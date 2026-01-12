@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>קופונים ושוברים</title>
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#2563eb">
+  <link rel="apple-touch-icon" href="icon-192.png">
+
+  <style>
+    :root{
+      --bg:#f6f7fb; --card:#fff; --border:#e5e7eb;
+      --primary:#2563eb; --primary2:#1d4ed8;
+      --danger:#dc2626; --muted:#6b7280;
+      --shadow:0 6px 18px rgba(0,0,0,0.06);
+      --radius:16px;
+      --pill:#f3f4f6;
+      --warn:#b45309;
+      --ok:#16a34a;
+      --near:#fee2e2;
+      --expired:#f3f4f6;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0; padding:14px;
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      background:var(--bg); color:#111827; line-height:1.35;
+    }
+    h1{margin:6px 0 14px;font-size:24px;font-weight:900}
+    h2{margin:0 0 10px;font-size:18px}
+    h3{margin:14px 0 6px;font-size:14px;color:var(--muted)}
+    .card{
+      background:var(--card); border:1px solid var(--border);
+      border-radius:var(--radius); box-shadow:var(--shadow);
+      padding:14px; margin-bottom:14px;
+      overflow:hidden;
+    }
+    .tabs{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+    .tabbtn{
+      border:1px solid var(--border); background:#fff;
+      border-radius:999px; padding:9px 12px; font-weight:900; cursor:pointer;
+    }
+    .tabbtn.active{background:var(--primary); color:#fff; border-color:var(--primary);}
+    .view{display:none}
+    .view.active{display:block}
+
+    .field{margin-top:10px; min-width:0; overflow:hidden;}
+    label{font-weight:900}
+    input,select,textarea{
+      width:100%; padding:10px 12px; font-size:16px;
+      border-radius:12px; border:1px solid var(--border);
+      background:#fff;
+      max-width:100%;
+    }
+    input[type="date"]{width:100%;display:block;min-width:0;}
+    textarea{min-height:100px; resize:vertical}
+
+    .inline{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+    .inline > *{flex:1; min-width:160px}
+    .inline .tinybtn{flex:0 0 auto; min-width:auto}
+
+    .btn{
+      padding:10px 14px; border-radius:12px; border:none;
+      font-weight:900; cursor:pointer; white-space:nowrap;
+    }
+    .primary{background:var(--primary); color:#fff}
+    .primary:hover{background:var(--primary2)}
+    .danger{background:var(--danger); color:#fff}
+    .ghost{background:#eef2ff; color:#1e40af; border:1px solid #c7d2fe}
+    .ok{background:var(--ok); color:#fff}
+    .warn{background:#fff7ed; border:1px solid #fed7aa; color:var(--warn)}
+    .tinybtn{
+      padding:8px 10px; border-radius:12px; border:1px solid var(--border);
+      background:#f3f4f6; font-weight:900; cursor:pointer;
+    }
+
+    .note{font-size:13px;color:var(--muted);margin-top:6px}
+
+    .toolbar{display:flex; gap:8px; flex-wrap:wrap; align-items:center; justify-content:space-between;}
+    .toolbar-left{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+    .toolbar-right{display:flex; gap:8px; flex-wrap:wrap; align-items:center;}
+
+    .search{
+      flex:1;
+      min-width:220px;
+    }
+
+    .chips{
+      display:flex; gap:8px; flex-wrap:nowrap; overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+      padding-bottom:4px; margin:10px 0 6px;
+    }
+    .chip{
+      display:flex; align-items:center; gap:6px;
+      font-weight:900; font-size:12px;
+      background:#fff; border:1px solid var(--border);
+      padding:6px 8px; border-radius:999px;
+      white-space:nowrap; flex:0 0 auto;
+      cursor:pointer;
+    }
+    .chip.active{background:var(--primary); color:#fff; border-color:var(--primary);}
+
+    ul{list-style:none;padding:0;margin:10px 0 0}
+    li{
+      background:#fff; border:1px solid var(--border);
+      border-radius:14px; padding:10px; margin-bottom:8px;
+    }
+    .rowtop{display:flex; justify-content:space-between; gap:10px; align-items:flex-start;}
+    .title{font-weight:900; font-size:16px}
+    .meta{color:#374151; font-weight:900; font-size:13px; margin-top:4px}
+    .badges{display:flex; gap:6px; flex-wrap:wrap; margin-top:8px;}
+    .badge{
+      display:inline-flex; align-items:center; justify-content:center;
+      padding:6px 10px; border-radius:999px;
+      font-weight:900; font-size:12px;
+      border:1px solid var(--border);
+      background:var(--pill);
+      white-space:nowrap;
+    }
+    .badge.near{background:var(--near); border-color:#fecaca}
+    .badge.expired{background:var(--expired)}
+    .badge.physical{background:#ecfeff; border-color:#a5f3fc}
+    .badge.type{background:#eef2ff; border-color:#c7d2fe}
+    .actions{display:flex; gap:8px; flex-wrap:wrap; justify-content:flex-end;}
+    .actionbtn{
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#f3f4f6;
+      font-weight:900;
+      cursor:pointer;
+      white-space:nowrap;
+    }
+
+    .kv{display:flex; justify-content:space-between; gap:10px; padding:6px 0; border-bottom:1px dashed var(--border); font-weight:900;}
+    .kv:last-child{border-bottom:none}
+    .kv span{color:#374151; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left;}
+
+    .modal-backdrop{
+      position:fixed; inset:0;
+      background:rgba(0,0,0,0.35);
+      display:none;
+      align-items:center;
+      justify-content:center;
+      padding:14px;
+      z-index:9999;
+    }
+    .modal{
+      width:100%;
+      max-width:780px;
+      background:#fff;
+      border:1px solid var(--border);
+      border-radius:18px;
+      box-shadow:0 16px 50px rgba(0,0,0,0.2);
+      padding:14px;
+      max-height:90vh;
+      overflow:auto;
+    }
+    .modal-header{
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      margin-bottom:10px;
+    }
+    .modal-title{font-weight:900;font-size:18px}
+    .modal-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+    @media(min-width:700px){ body{max-width:900px;margin:auto} }
+  </style>
+</head>
+
+<body>
+<h1>🎟️ קופונים ושוברים</h1>
+
+<div class="tabs">
+  <button class="tabbtn active" type="button" onclick="showTab('active')">פעילים</button>
+  <button class="tabbtn" type="button" onclick="showTab('archive')">ארכיון</button>
+  <button class="tabbtn" type="button" onclick="showTab('manage')">ניהול</button>
+  <button class="tabbtn" type="button" onclick="showTab('data')">נתונים</button>
+</div>
+
+<section id="view-active" class="view active">
+  <section class="card">
+    <div class="toolbar">
+      <div class="toolbar-left" style="flex:1;">
+        <input id="q" class="search" placeholder="חיפוש: שם שובר / רשת / חנות" oninput="renderActive()">
+        <select id="sortMode" onchange="renderActive()" style="max-width:220px;">
+          <option value="smart" selected>מיון חכם (כולל תוקף)</option>
+          <option value="expiry">תוקף קרוב</option>
+          <option value="value">יתרה גבוהה</option>
+          <option value="name">שם (א-ב)</option>
+        </select>
+      </div>
+      <div class="toolbar-right">
+        <button class="btn primary" type="button" onclick="openVoucherModal(null)">+ הוסף שובר</button>
+      </div>
+    </div>
+
+    <div class="chips" id="filterChips"></div>
+
+    <div class="note" id="activeHint"></div>
+
+    <ul id="activeList"></ul>
+  </section>
+</section>
+
+<section id="view-archive" class="view">
+  <section class="card">
+    <div class="toolbar">
+      <div class="toolbar-left" style="flex:1;">
+        <input id="q2" class="search" placeholder="חיפוש בארכיון" oninput="renderArchive()">
+        <select id="sortArchive" onchange="renderArchive()" style="max-width:220px;">
+          <option value="recent" selected>עודכן לאחרונה</option>
+          <option value="expiry">תוקף</option>
+          <option value="name">שם (א-ב)</option>
+        </select>
+      </div>
+    </div>
+    <ul id="archiveList"></ul>
+  </section>
+</section>
+
+<section id="view-manage" class="view">
+  <section class="card">
+    <h2>ניהול מותגים / חנויות / קטגוריות</h2>
+
+    <div class="chips">
+      <div class="chip active" id="mg-brands" onclick="showManage('brands')">מותגים</div>
+      <div class="chip" id="mg-stores" onclick="showManage('stores')">חנויות</div>
+      <div class="chip" id="mg-cats" onclick="showManage('cats')">קטגוריות</div>
+    </div>
+
+    <div id="manage-brands">
+      <h3>מותגים (רשת ראשית)</h3>
+      <div class="inline">
+        <input id="newBrandName" placeholder="שם מותג (למשל DREAM / LOVE)">
+        <button class="btn primary" type="button" onclick="addBrand()">הוסף</button>
+      </div>
+      <div class="note">אפשר לשייך חנויות למותג גם מתוך עריכת שובר.</div>
+      <ul id="brandsList"></ul>
+    </div>
+
+    <div id="manage-stores" style="display:none;">
+      <h3>חנויות</h3>
+      <div class="inline">
+        <input id="newStoreName" placeholder="שם חנות (למשל קסטרו)">
+        <button class="btn primary" type="button" onclick="addStore()">הוסף</button>
+      </div>
+      <div class="note">חנות יכולה להשתייך לכמה מותגים, ואפשר לסווג לקטגוריות.</div>
+      <ul id="storesList"></ul>
+    </div>
+
+    <div id="manage-cats" style="display:none;">
+      <h3>קטגוריות</h3>
+      <div class="inline">
+        <input id="newCatName" placeholder="שם קטגוריה (למשל אופנה / מסעדות)">
+        <button class="btn primary" type="button" onclick="addCategory()">הוסף</button>
+      </div>
+      <ul id="catsList"></ul>
+    </div>
+
+  </section>
+</section>
+
+<section id="view-data" class="view">
+  <section class="card">
+    <h2>סנכרון וגיבוי</h2>
+    <div class="note" id="syncStatusLine"></div>
+    <div class="note" id="syncLastLine"></div>
+
+    <div class="inline" style="margin-top:10px;">
+      <button class="btn ghost" type="button" onclick="cloudPull()">משוך נתונים מהענן</button>
+      <button class="btn ok" type="button" onclick="cloudPush()">שלח נתונים לענן</button>
+      <button class="btn ghost" type="button" onclick="backupNow()">גיבוי לקובץ</button>
+      <button class="btn ghost" type="button" onclick="triggerRestore()">טעינת גיבוי</button>
+    </div>
+
+    <input id="restoreFile" type="file" accept=".json,application/json" style="display:none" onchange="restoreFromFile(event)">
+
+    <div class="note" style="margin-top:10px;">
+      טיפ: אם יש “התנגשות” בין מכשירים — פשוט משכו מהענן ואז שלחו מחדש.
+      במקרה של התנגשות אמיתית, <b>Yanir מנצח</b>.
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>הגדרות מכשיר</h2>
+    <div class="note">ברירת מחדל: Yanir במכשיר אחד, Wife במכשיר השני.</div>
+    <div class="inline">
+      <select id="deviceName" onchange="setDeviceName(this.value)">
+        <option value="Yanir">Yanir</option>
+        <option value="Wife">Wife</option>
+      </select>
+      <button class="btn danger" type="button" onclick="resetAll()">איפוס מקומי</button>
+    </div>
+  </section>
+</section>
+
+<!-- Voucher modal -->
+<div id="voucherBackdrop" class="modal-backdrop" onclick="closeVoucherModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title" id="voucherTitle">+ שובר חדש</div>
+      <div class="modal-actions">
+        <button class="tinybtn" type="button" onclick="saveVoucher()">שמירה</button>
+        <button class="tinybtn" type="button" onclick="hideVoucherModal()">סגור</button>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>שם השובר</label>
+      <input id="v_title" placeholder="למשל: שובר DREAM / LOVE / קסטרו">
+    </div>
+
+    <div class="field">
+      <label>סוג</label>
+      <select id="v_type" onchange="renderTypeFields()">
+        <option value="money">שובר כספי</option>
+        <option value="percent">אחוז הנחה</option>
+        <option value="bogo">1+1 / מבצע</option>
+        <option value="generic" selected>כללי</option>
+      </select>
+      <div class="note">אם משהו לא מתאים — בחר “כללי” וכתוב בפרטים.</div>
+    </div>
+
+    <div class="field" style="margin-top:12px;">
+      <label style="display:flex;align-items:center;gap:10px;">
+        <input type="checkbox" id="v_physical" onchange="renderTypeFields()" style="width:18px;height:18px;margin:0">
+        כרטיס פיזי (אין קוד להעתקה)
+      </label>
+    </div>
+
+    <div class="field" id="codeWrap">
+      <label>קוד (אופציונלי)</label>
+      <input id="v_code" placeholder="הדבק קוד כאן">
+      <div class="note">אחר כך יהיה כפתור “העתק קוד”.</div>
+    </div>
+
+    <div class="field">
+      <label>תוקף (אופציונלי)</label>
+      <input type="date" id="v_exp">
+      <div class="note"><= 3 חודשים יסומן “קרוב לפקיעה” ויקפוץ לראש.</div>
+    </div>
+
+    <div class="field" id="moneyWrap" style="display:none;">
+      <h3>ערך / ניצול</h3>
+      <div class="inline">
+        <input id="v_face" inputmode="decimal" placeholder="ערך מקורי (למשל 500)">
+        <input id="v_used" inputmode="decimal" placeholder="נוצל (למשל 200)">
+      </div>
+      <div class="note">אין היסטוריה — רק סכום נוצל/יתרה (כמו שביקשת).</div>
+    </div>
+
+    <div class="field" id="percentWrap" style="display:none;">
+      <h3>אחוז/תקרות</h3>
+      <input id="v_details_percent" placeholder='למשל: "20% עד 200₪" או "20% על 200₪"'>
+      <div class="note">אם יש “יתרה” (למשל נשאר 20₪ מתוך 200) — אפשר להשתמש בערך/נוצל למעלה.</div>
+    </div>
+
+    <div class="field" id="bogoWrap" style="display:none;">
+      <h3>פירוט מבצע</h3>
+      <input id="v_details_bogo" placeholder='למשל: "1+1 על קפה", "2+1", "מתנה בהצטרפות"'>
+    </div>
+
+    <div class="field">
+      <label>פרטים / הערות</label>
+      <textarea id="v_notes" placeholder="כל מה שחשוב לזכור…"></textarea>
+    </div>
+
+    <div class="field">
+      <h3>מותגים (רשת ראשית) — רב בחי
