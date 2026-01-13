@@ -1,8 +1,8 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="he" dir="rtl">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>שוברים וקופונים</title>
 
   <link rel="manifest" href="manifest.webmanifest">
@@ -13,19 +13,24 @@
     :root{
       --bg:#f6f7fb; --card:#fff; --border:#e5e7eb;
       --primary:#2563eb; --primary2:#1d4ed8;
-      --danger:#dc2626; --warn:#f59e0b; --ok:#16a34a; --muted:#6b7280;
+      --danger:#dc2626; --muted:#6b7280;
       --shadow:0 6px 18px rgba(0,0,0,0.06);
       --radius:16px;
       --pill:#f3f4f6;
 
       /* Pastel status colors */
-      --p-green:#d1fae5; --p-green-b:#34d399;
-      --p-yellow:#fef3c7; --p-yellow-b:#fbbf24;
-      --p-red:#fee2e2; --p-red-b:#f87171;
-      --p-gray:#f3f4f6; --p-gray-b:#9ca3af;
+      --st-green:#d1fae5;
+      --st-yellow:#fef3c7;
+      --st-gray:#e5e7eb;
+      --st-red:#fee2e2;
 
-      --soft-green:#e8f7ee; --soft-green-b:#6ee7b7;
-      --soft-blue:#eef2ff; --soft-blue-b:#93c5fd;
+      --accent-green:#22c55e;
+      --accent-yellow:#f59e0b;
+      --accent-gray:#64748b;
+      --accent-red:#ef4444;
+
+      --soft-green:#e8f7ee;
+      --soft-blue:#eef2ff;
     }
     *{box-sizing:border-box}
     body{
@@ -33,8 +38,6 @@
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       background:var(--bg); color:#111827; line-height:1.35;
     }
-    @media(min-width:700px){ body{max-width:900px;margin:auto} }
-
     h1{margin:6px 0 14px;font-size:24px;font-weight:900}
     h2{margin:0 0 10px;font-size:18px}
     h3{margin:14px 0 6px;font-size:14px;color:var(--muted)}
@@ -50,7 +53,6 @@
       border-radius:999px; padding:9px 12px; font-weight:900; cursor:pointer;
     }
     .tabbtn.active{background:var(--primary); color:#fff; border-color:var(--primary);}
-
     .view{display:none}
     .view.active{display:block}
 
@@ -62,12 +64,13 @@
       background:#fff;
       max-width:100%;
     }
-    input[type="date"]{display:block}
+    input[type="date"]{width:100%; max-width:100%; display:block; min-width:0;}
     textarea{min-height:120px; resize:vertical}
 
     .inline{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
     .inline > *{flex:1; min-width:180px}
-    .inline .fit{flex:0 0 auto; min-width:auto}
+    .inline .tight{flex:0 0 auto; min-width:auto}
+    .inline .btn{flex:0 0 auto; min-width:auto}
 
     .btn{
       padding:10px 14px; border-radius:12px; border:none;
@@ -75,118 +78,157 @@
     }
     .primary{background:var(--primary); color:#fff}
     .primary:hover{background:var(--primary2)}
-    .ghost{background:#eef2ff; color:#1e40af; border:1px solid #c7d2fe}
     .danger{background:var(--danger); color:#fff}
-    .okbtn{background:#dcfce7; color:#166534; border:1px solid #86efac}
-    .mutebtn{background:#f3f4f6; color:#111827; border:1px solid var(--border)}
-    .syncPull{background:var(--soft-blue); color:#1e40af; border:1px solid var(--soft-blue-b)}
-    .syncPush{background:var(--soft-green); color:#065f46; border:1px solid var(--soft-green-b)}
+    .ghost{background:#eef2ff; color:#1e40af; border:1px solid #c7d2fe}
+    .softgreen{background:#16a34a14; color:#065f46; border:1px solid #86efac}
+    .softgreen:hover{background:#16a34a22}
+
+    .iconbtn{
+      background:#f3f4f6; color:#111827;
+      padding:8px 10px; border-radius:12px; border:1px solid var(--border);
+      font-weight:900; line-height:1;
+      cursor:pointer;
+      display:inline-flex; align-items:center; justify-content:center;
+      min-width:40px;
+    }
 
     .note{font-size:13px;color:var(--muted);margin-top:6px}
 
-    /* Add bubble (separate from search) */
-    .addbubble{
-      border:1px solid #c7f9d7;
-      background:var(--soft-green);
-      border-radius:18px;
-      padding:14px;
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:12px;
+    .chips{
+      display:flex; gap:8px; flex-wrap:nowrap; overflow-x:auto;
+      -webkit-overflow-scrolling:touch;
+      padding-bottom:4px; margin:8px 0 10px;
     }
-    .addbubble .title{font-weight:900;font-size:16px}
-    .addbubble .sub{color:#065f46;font-weight:900;font-size:13px;margin-top:4px}
-    .addbubble .cta{
-      background:#ecfeff;
-      border:1px solid #a5f3fc;
-      color:#155e75;
-    }
-
-    /* Search bubble */
-    .searchrow{
-      display:flex; gap:10px; flex-wrap:wrap; align-items:center;
-    }
-    .searchrow input{flex:1; min-width:220px}
-    .searchrow .fit{flex:0 0 auto; min-width:auto}
-
-    /* Filters rows */
-    .filtersCol{display:flex; flex-direction:column; gap:8px; margin-top:10px;}
-    .filtersRow{display:flex; gap:8px; flex-wrap:nowrap; overflow-x:auto; -webkit-overflow-scrolling:touch; padding-bottom:4px;}
-    .pillbtn{
-      display:inline-flex; align-items:center; justify-content:center;
-      padding:7px 10px; border-radius:999px;
+    .chip{
+      display:flex; align-items:center; gap:6px;
       font-weight:900; font-size:12px;
       background:#fff; border:1px solid var(--border);
-      white-space:nowrap; cursor:pointer;
-      flex:0 0 auto;
+      padding:6px 10px; border-radius:999px;
+      white-space:nowrap; flex:0 0 auto;
+      cursor:pointer;
     }
-    .pillbtn.active{background:var(--primary); color:#fff; border-color:var(--primary);}
-    .pillbtn.soft{background:var(--pill);}
-    .pillbtn.warn{background:var(--p-red); border-color:var(--p-red-b);}
+    .chip.active{background:var(--primary); color:#fff; border-color:var(--primary);}
+    .chip.small{padding:6px 8px}
+    .chip.muted{background:#f8fafc}
 
-    /* Coupon list */
-    .couponCard{
+    ul{list-style:none;padding:0;margin:10px 0 0}
+    li{
+      display:flex; justify-content:space-between; gap:10px;
       background:#fff; border:1px solid var(--border);
-      border-radius:18px; padding:12px;
+      border-radius:14px; padding:10px; margin-bottom:8px;
+      align-items:center;
+    }
+    li span{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+    .btn-group{display:flex; gap:8px; align-items:center; flex:0 0 auto}
+
+    /* Voucher list cards */
+    .vcard{
+      border:1px solid var(--border);
+      background:#fff;
+      border-radius:18px;
+      padding:12px;
       margin-bottom:10px;
-      overflow:hidden;
+      box-shadow:0 4px 12px rgba(0,0,0,0.03);
     }
-    .couponTop{
-      display:flex; align-items:flex-start; justify-content:space-between; gap:10px;
+    .vtop{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:10px; margin-bottom:8px;
     }
-    .couponTitle{
-      font-weight:900; font-size:16px; margin:0;
+    .vtitle{
+      font-weight:1000;
+      font-size:16px;
+      margin:0;
+      display:flex; align-items:center; gap:8px;
       min-width:0;
     }
-    .couponMeta{
-      margin-top:6px;
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-      align-items:center;
+    .vsubtitle{
+      font-weight:900;
       color:#374151;
-      font-weight:900;
       font-size:13px;
-    }
-    .badge{
-      display:inline-flex; align-items:center; gap:6px;
-      padding:6px 10px; border-radius:999px;
-      border:1px solid var(--border);
-      background:var(--pill);
+      margin-top:4px;
       white-space:nowrap;
-      font-size:12px;
+      overflow:hidden;
+      text-overflow:ellipsis;
+    }
+    .vmeta{
+      display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;
+    }
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      padding:6px 10px;
+      border-radius:999px;
       font-weight:900;
-    }
-    .badge.red{background:var(--p-red); border-color:var(--p-red-b);}
-    .badge.yellow{background:var(--p-yellow); border-color:var(--p-yellow-b);}
-    .badge.green{background:var(--p-green); border-color:var(--p-green-b);}
-    .badge.gray{background:var(--p-gray); border-color:var(--p-gray-b);}
-    .actions{
-      display:flex; gap:8px; align-items:center; flex:0 0 auto;
-      justify-content:flex-start;
-    }
-    .openbtn{
-      background:#fff; border:1px solid var(--border); border-radius:12px;
-      padding:8px 12px; font-weight:900; cursor:pointer; white-space:nowrap;
+      font-size:12px;
+      border:1px solid var(--border);
+      white-space:nowrap;
+      background:var(--pill);
     }
 
-    /* Status icon */
-    .statusIcon{
-      width:30px; height:30px;
-      border-radius:12px;
-      display:inline-flex; align-items:center; justify-content:center;
-      border:1px solid var(--border);
+    /* Status icon (left side) + Open button next to it */
+    .leftActions{
+      display:flex;
+      align-items:center;
+      gap:8px;
       flex:0 0 auto;
     }
-    .statusIcon svg{width:16px;height:16px}
-    .s-green{background:var(--p-green); border-color:var(--p-green-b);}
-    .s-yellow{background:var(--p-yellow); border-color:var(--p-yellow-b);}
-    .s-red{background:var(--p-red); border-color:var(--p-red-b);}
-    .s-gray{background:var(--p-gray); border-color:var(--p-gray-b);}
+    .statusIcon{
+      width:34px; height:34px;
+      border-radius:12px;
+      display:inline-flex;
+      align-items:center;
+      justify-content:center;
+      border:1px solid var(--border);
+      font-weight:1000;
+      user-select:none;
+    }
+    .st-green{background:var(--st-green); color:#065f46; border-color:#86efac}
+    .st-yellow{background:var(--st-yellow); color:#92400e; border-color:#fde68a}
+    .st-gray{background:var(--st-gray); color:#334155; border-color:#cbd5e1}
+    .st-red{background:var(--st-red); color:#991b1b; border-color:#fecaca}
+
+    .openBtn{
+      padding:8px 10px;
+      border-radius:12px;
+      border:1px solid var(--border);
+      background:#fff;
+      cursor:pointer;
+      font-weight:1000;
+      white-space:nowrap;
+    }
+
+    .sectionTitleRow{
+      display:flex; align-items:center; justify-content:space-between; gap:10px;
+    }
+
+    /* Split filter rows */
+    .filterBlock{
+      margin-top:10px;
+      border:1px solid var(--border);
+      border-radius:16px;
+      padding:10px;
+      background:#fff;
+    }
+    .filterLabel{font-weight:1000; font-size:13px; color:#374151; margin:0 0 6px}
+    .searchRow{
+      display:flex; gap:10px; align-items:center; flex-wrap:wrap;
+    }
+    .searchRow input{flex:1; min-width:220px}
+    .searchRow .tight{flex:0 0 auto}
+
+    .twoCols{
+      display:grid;
+      grid-template-columns:1fr;
+      gap:10px;
+    }
+    @media(min-width:720px){
+      body{max-width:900px;margin:auto}
+      .twoCols{grid-template-columns:1fr 1fr;}
+    }
 
     /* Modal */
-    .backdrop{
+    .modal-backdrop{
       position:fixed; inset:0;
       background:rgba(0,0,0,0.35);
       display:none;
@@ -197,22 +239,29 @@
     }
     .modal{
       width:100%;
-      max-width:780px;
+      max-width:760px;
       background:#fff;
       border:1px solid var(--border);
       border-radius:18px;
       box-shadow:0 16px 50px rgba(0,0,0,0.2);
       padding:14px;
+      max-height:86vh;
+      overflow:auto;
     }
-    .modalHeader{
+    .modal-header{
       display:flex;
       align-items:center;
       justify-content:space-between;
       gap:10px;
       margin-bottom:10px;
+      position:sticky;
+      top:0;
+      background:#fff;
+      padding-bottom:8px;
+      z-index:2;
     }
-    .modalTitle{font-weight:900;font-size:18px}
-    .modalActions{display:flex;gap:10px;flex-wrap:wrap}
+    .modal-title{font-weight:1000;font-size:18px}
+    .modal-actions{display:flex;gap:10px;flex-wrap:wrap}
     .tiny{
       padding:8px 10px;
       border-radius:12px;
@@ -222,101 +271,41 @@
       cursor:pointer;
       white-space:nowrap;
     }
+    .tiny.primary{background:var(--primary); color:#fff; border-color:var(--primary)}
+    .tiny.danger{background:var(--danger); color:#fff; border-color:var(--danger)}
 
-    /* “Amounts” block */
-    .amountsBlock{
-      margin-top:10px;
-      border:1px solid #dbeafe;
-      background:#eff6ff;
-      border-radius:16px;
-      padding:12px;
+    .divider{
+      height:1px;
+      background:var(--border);
+      margin:12px 0;
     }
-    .amountsGrid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:10px;
-    }
-    @media(min-width:700px){
-      .amountsGrid{grid-template-columns:repeat(3, 1fr);}
-    }
+
     .readonly{
       background:#f9fafb;
       color:#111827;
     }
 
-    /* Manage lists */
-    ul{list-style:none;padding:0;margin:10px 0 0}
-    li{
+    .warn{
+      color:var(--danger);
+      font-size:13px;
+      margin-top:8px;
+      display:none;
+      font-weight:900;
+    }
+
+    .kvs{
+      display:flex; flex-direction:column; gap:6px; margin-top:6px;
+    }
+    .kv{
       display:flex; justify-content:space-between; gap:10px;
-      background:#fff; border:1px solid var(--border);
-      border-radius:14px; padding:10px; margin-bottom:8px;
+      padding:8px 10px;
+      border:1px dashed var(--border);
+      border-radius:14px;
+      background:#fafafa;
       align-items:center;
     }
-    li span{flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-weight:900;}
-    .btnGroup{display:flex; gap:8px; align-items:center; flex:0 0 auto}
-    .iconbtn{
-      background:#f3f4f6; color:#111827;
-      padding:8px 10px; border-radius:12px; border:1px solid var(--border);
-      font-weight:900; line-height:1;
-      cursor:pointer;
-      display:inline-flex; align-items:center; justify-content:center;
-      min-width:40px;
-    }
-    .openSmall{
-      background:#eef2ff;
-      border:1px solid #c7d2fe;
-      color:#1e40af;
-      min-width:46px;
-    }
-    .enableBtn{
-      background:#eff6ff;
-      border:1px solid #93c5fd;
-      color:#1e40af;
-      min-width:46px;
-    }
-    .disabledTag{
-      font-size:12px;
-      font-weight:900;
-      color:#6b7280;
-      padding:4px 8px;
-      border-radius:999px;
-      border:1px dashed var(--border);
-      background:#fafafa;
-      white-space:nowrap;
-    }
-
-    details.dropdown{
-      border:1px solid var(--border);
-      border-radius:14px;
-      padding:10px 12px;
-      background:#fff;
-    }
-    details.dropdown summary{
-      cursor:pointer;
-      font-weight:900;
-      list-style:none;
-    }
-    details.dropdown summary::-webkit-details-marker{display:none}
-    .choiceList{
-      margin-top:10px;
-      display:flex;
-      flex-direction:column;
-      gap:8px;
-    }
-    .choiceRow{
-      display:flex; align-items:center; gap:10px;
-      padding:10px;
-      border:1px solid var(--border);
-      border-radius:14px;
-      background:#fff;
-    }
-    .choiceRow.active{
-      background:#eef2ff;
-      border-color:#93c5fd;
-    }
-    .choiceRow input{width:18px;height:18px;margin:0}
-
-    .hr{height:1px;background:var(--border);margin:12px 0}
+    .kv b{white-space:nowrap}
+    .kv span{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:left; color:#374151; font-weight:900;}
   </style>
 </head>
 
@@ -330,127 +319,141 @@
     <button class="tabbtn" type="button" onclick="showTab('data')">נתונים</button>
   </div>
 
-  <!-- ACTIVE -->
+  <!-- פעילים -->
   <section id="view-active" class="view active">
-    <section class="card">
-      <div class="addbubble">
+    <section class="card" style="background:var(--soft-green); border-color:#bbf7d0;">
+      <div class="sectionTitleRow">
         <div>
-          <div class="title">יצירת שובר חדש</div>
-          <div class="sub">לחץ כאן להוספת שובר חדש</div>
+          <h2 style="margin:0;">יצירת שובר חדש</h2>
+          <div class="note" style="margin:6px 0 0; font-weight:900; color:#065f46;">לחץ כאן להוספת שובר חדש</div>
         </div>
-        <button class="btn cta fit" type="button" onclick="openCouponEditor(null)">➕ הוסף שובר</button>
+        <button class="btn softgreen" type="button" onclick="openVoucherCreate()">+ הוסף שובר</button>
       </div>
     </section>
 
     <section class="card">
       <h2>חיפוש וסינון</h2>
 
-      <div class="searchrow">
-        <input id="searchActive" placeholder="חיפוש: שם מותג / חנות / שובר" oninput="renderActive()" />
-        <button class="btn ghost fit" type="button" onclick="clearActiveFilters()">נקה</button>
+      <div class="searchRow">
+        <input id="searchInputActive" placeholder="חיפוש לפי מותג / חנות / הערות / קוד..." oninput="renderActive()">
+        <button class="btn ghost tight" type="button" onclick="clearSearch('active')">נקה</button>
       </div>
 
-      <div class="note" id="searchTipActive">טיפ: חפש לפי חנות — ותראה אילו שוברים מקבלים שם (גם אם הם תחת מותג אחר).</div>
+      <div class="note" style="font-weight:900; margin-top:8px;">
+        טיפ: אם מסעדה/חנות מופיעה בכמה שוברים — תוכל לסנן לפי החנות ולמיין לפי תוקף/יתרה כדי לבחור מה לנצל.
+      </div>
 
-      <div class="filtersCol">
-        <div class="filtersRow">
-          <button class="pillbtn active" id="actFilterAll" type="button" onclick="setActiveQuickFilter('all')">הכל</button>
-          <button class="pillbtn warn" id="actFilterNear" type="button" onclick="setActiveQuickFilter('near')">קרוב לפקיעה</button>
-        </div>
+      <div class="filterBlock">
+        <div class="filterLabel">מצב</div>
+        <div class="chips" id="chipsStateActive"></div>
 
-        <div class="filtersRow" id="activeBrandRow"></div>
-        <div class="filtersRow" id="activeStoreRow"></div>
-        <div class="filtersRow" id="activeCatRow"></div>
+        <div class="filterLabel" style="margin-top:10px;">מותגים</div>
+        <div class="chips" id="chipsBrandsActive"></div>
+
+        <div class="filterLabel" style="margin-top:10px;">חנויות</div>
+        <div class="chips" id="chipsStoresActive"></div>
+
+        <div class="filterLabel" style="margin-top:10px;">קטגוריות</div>
+        <div class="chips" id="chipsCatsActive"></div>
+
+        <div class="filterLabel" style="margin-top:10px;">מיון</div>
+        <div class="chips" id="chipsSortActive"></div>
       </div>
     </section>
 
     <section class="card">
-      <h2>שוברים פעילים</h2>
-      <div class="note" id="activeCount"></div>
+      <div class="sectionTitleRow">
+        <h2 style="margin:0;">רשימת שוברים פעילים</h2>
+        <span class="pill" id="activeCount">0</span>
+      </div>
       <div id="activeList"></div>
+      <div class="note" id="activeEmpty" style="display:none;">אין שוברים להצגה.</div>
     </section>
   </section>
 
-  <!-- ARCHIVE -->
+  <!-- ארכיון -->
   <section id="view-archive" class="view">
     <section class="card">
       <h2>חיפוש וסינון</h2>
 
-      <div class="searchrow">
-        <input id="searchArchive" placeholder="חיפוש בארכיון: מותג / חנות / שובר" oninput="renderArchive()" />
-        <button class="btn ghost fit" type="button" onclick="clearArchiveFilters()">נקה</button>
+      <div class="searchRow">
+        <input id="searchInputArchive" placeholder="חיפוש בארכיון לפי מותג / חנות / הערות / קוד..." oninput="renderArchive()">
+        <button class="btn ghost tight" type="button" onclick="clearSearch('archive')">נקה</button>
       </div>
 
-      <div class="filtersCol">
-        <div class="filtersRow">
-          <button class="pillbtn active" id="arcFilterAll" type="button" onclick="setArchiveQuickFilter('all')">הכל</button>
-          <button class="pillbtn warn" id="arcFilterNear" type="button" onclick="setArchiveQuickFilter('near')">קרוב לפקיעה</button>
-        </div>
+      <div class="filterBlock">
+        <div class="filterLabel">מצב</div>
+        <div class="chips" id="chipsStateArchive"></div>
 
-        <div class="filtersRow" id="archiveBrandRow"></div>
-        <div class="filtersRow" id="archiveStoreRow"></div>
-        <div class="filtersRow" id="archiveCatRow"></div>
+        <div class="filterLabel" style="margin-top:10px;">מותגים</div>
+        <div class="chips" id="chipsBrandsArchive"></div>
+
+        <div class="filterLabel" style="margin-top:10px;">חנויות</div>
+        <div class="chips" id="chipsStoresArchive"></div>
+
+        <div class="filterLabel" style="margin-top:10px;">קטגוריות</div>
+        <div class="chips" id="chipsCatsArchive"></div>
+
+        <div class="filterLabel" style="margin-top:10px;">מיון</div>
+        <div class="chips" id="chipsSortArchive"></div>
       </div>
     </section>
 
     <section class="card">
-      <h2>ארכיון</h2>
-      <div class="note" id="archiveCount"></div>
+      <div class="sectionTitleRow">
+        <h2 style="margin:0;">ארכיון</h2>
+        <span class="pill" id="archiveCount">0</span>
+      </div>
       <div id="archiveList"></div>
+      <div class="note" id="archiveEmpty" style="display:none;">אין שוברים בארכיון להצגה.</div>
     </section>
   </section>
 
-  <!-- MANAGE -->
+  <!-- ניהול -->
   <section id="view-manage" class="view">
     <section class="card">
-      <h2>ניהול</h2>
-      <div class="note">כאן מנהלים שמות + שיוכים (מותג↔חנויות↔קטגוריות). מחיקה/השבתה לא שוברת היסטוריה.</div>
+      <h2>ניהול מותגים</h2>
       <div class="inline">
-        <input id="manageSearch" placeholder="חיפוש בניהול..." oninput="renderManage()" />
-        <button class="btn ghost fit" type="button" onclick="clearManageSearch()">נקה</button>
+        <input id="newBrandInput" placeholder="שם מותג חדש">
+        <button class="btn primary" type="button" onclick="addBrand()">הוסף</button>
       </div>
+      <div class="note">מחיקת מותג לא מוחקת שוברים היסטוריים שכבר נוצרו — השמות נשמרים בתוך השובר עצמו.</div>
+      <div id="brandsList"></div>
     </section>
 
     <section class="card">
-      <h2>מותגים</h2>
+      <h2>ניהול חנויות</h2>
       <div class="inline">
-        <input id="newBrandName" placeholder="הוסף מותג חדש" />
-        <button class="btn primary fit" type="button" onclick="addBrandFromManage()">הוסף</button>
+        <input id="newStoreInput" placeholder="שם חנות חדשה">
+        <button class="btn primary" type="button" onclick="addStore()">הוסף</button>
       </div>
-      <ul id="brandsList"></ul>
+      <div class="note">חנות יכולה להשתייך למספר מותגים. את זה מנהלים במסך “פתח” של מותג/חנות.</div>
+      <div id="storesList"></div>
     </section>
 
     <section class="card">
-      <h2>חנויות</h2>
+      <h2>ניהול קטגוריות</h2>
       <div class="inline">
-        <input id="newStoreName" placeholder="הוסף חנות חדשה" />
-        <button class="btn primary fit" type="button" onclick="addStoreFromManage()">הוסף</button>
+        <input id="newCatInput" placeholder="שם קטגוריה חדשה">
+        <button class="btn primary" type="button" onclick="addCategory()">הוסף</button>
       </div>
-      <ul id="storesList"></ul>
-    </section>
-
-    <section class="card">
-      <h2>קטגוריות</h2>
-      <div class="inline">
-        <input id="newCatName" placeholder="הוסף קטגוריה חדשה" />
-        <button class="btn primary fit" type="button" onclick="addCategoryFromManage()">הוסף</button>
-      </div>
-      <ul id="catsList"></ul>
+      <div class="note">קטגוריות משויכות לחנויות (ולא למותגים), ומשמשות לסינון מהיר במסך הראשי ובארכיון.</div>
+      <div id="catsList"></div>
     </section>
   </section>
 
-  <!-- DATA -->
+  <!-- נתונים -->
   <section id="view-data" class="view">
     <section class="card">
-      <h2>🔄 סנכרון</h2>
+      <h2>סנכרון</h2>
       <div class="note" id="syncStatusLine"></div>
       <div class="note" id="syncLastLine"></div>
 
       <div class="inline" style="margin-top:10px;">
-        <button class="btn syncPull fit" type="button" onclick="syncPullNow()">משוך נתונים מהענן</button>
-        <button class="btn syncPush fit" type="button" onclick="syncPushNow()">שלח נתונים לענן</button>
-        <button class="btn ghost fit" type="button" onclick="backupNow()">גיבוי לקובץ</button>
-        <button class="btn ghost fit" type="button" onclick="triggerRestore()">טעינת גיבוי מקובץ</button>
+        <button class="btn primary" type="button" onclick="syncPullNow()">⬇️ משוך נתונים מהענן</button>
+        <button class="btn primary" type="button" onclick="syncPushNow()">⬆️ שלח נתונים לענן</button>
+        <button class="btn ghost" type="button" onclick="backupNow()">גיבוי לקובץ</button>
+        <button class="btn ghost" type="button" onclick="triggerRestore()">טעינת גיבוי</button>
       </div>
 
       <input id="restoreFile" type="file" accept=".json,application/json" style="display:none" onchange="restoreFromFile(event)">
@@ -459,206 +462,279 @@
     </section>
 
     <section class="card" id="deviceCard" style="display:none;">
-      <h2>הגדרות מכשיר (רק Yanir)</h2>
-      <div class="note">המסך הזה מוסתר משירלי כדי לא לבלבל. הוא קובע מי “השם” שנשלח למטה-דאטא בענן.</div>
+      <h2>הגדרות מכשיר (רק אצל Yanir)</h2>
+      <div class="note">זה לא מסך לאשתך. זה רק כדי למנוע בלבול ולשמור על ברירת מחדל שבה Yanir מנצח אם יש התנגשות.</div>
+
       <div class="field">
-        <label>שם מכשיר/משתמש (לענן)</label>
-        <select id="deviceNameSelect" onchange="changeDeviceName()">
+        <label>שם מכשיר לסנכרון</label>
+        <select id="deviceNameSelect" onchange="setDeviceNameFromUI()">
           <option value="Yanir">Yanir</option>
-          <option value="שירלי">שירלי</option>
+          <option value="Shirli">Shirli</option>
         </select>
-        <div class="note">השאר “Yanir” אצלך.</div>
+        <div class="note">אצל אשתך זה מוסתר. אצלה ברירת המחדל תהיה Shirli.</div>
       </div>
     </section>
 
     <section class="card">
       <h2>כלי בדיקה</h2>
-      <div class="note">מוחק רק שוברים (לא מוחק מותגים/חנויות/קטגוריות).</div>
-      <button class="btn danger" type="button" onclick="clearCouponsOnly()">מחק שוברים</button>
-    </section>
-
-    <section class="card">
-      <h2>איפוס מלא</h2>
-      <div class="note">מוחק הכל מהמכשיר (שוברים+מותגים+חנויות+קטגוריות).</div>
+      <div class="note">איפוס מוחק נתונים מקומיים מהמכשיר הזה בלבד.</div>
       <button class="btn danger" type="button" onclick="resetAll()">איפוס מלא</button>
     </section>
   </section>
 
-  <!-- Coupon editor modal -->
-  <div id="couponBackdrop" class="backdrop" onclick="closeCouponModal(event)">
+  <!-- MODAL: Create/Edit Voucher -->
+  <div id="voucherBackdrop" class="modal-backdrop" onclick="closeVoucherModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
-      <div class="modalHeader">
-        <div class="modalTitle" id="couponModalTitle">שובר</div>
-        <div class="modalActions">
-          <button class="tiny" type="button" onclick="saveCoupon()">שמירה</button>
-          <button class="tiny" type="button" onclick="hideCouponModal()">סגור</button>
+      <div class="modal-header">
+        <div class="modal-title" id="voucherModalTitle">שובר</div>
+        <div class="modal-actions">
+          <button class="tiny primary" type="button" onclick="saveVoucher()">שמירה</button>
+          <button class="tiny" type="button" onclick="hideVoucherModal()">סגור</button>
+        </div>
+      </div>
+
+      <div class="twoCols">
+        <div class="field">
+          <label>סוג שובר</label>
+          <select id="vType" onchange="renderVoucherFields()">
+            <option value="money">שובר כספי</option>
+            <option value="cap">הנחה עם תקרה (למשל 20% עד 200₪)</option>
+            <option value="percent">הנחה באחוזים (ללא תקרה)</option>
+            <option value="bogo">1+1 / מבצע</option>
+            <option value="general">כללי</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>כרטיס פיזי</label>
+          <select id="vPhysical" onchange="renderVoucherFields()">
+            <option value="0" selected>לא</option>
+            <option value="1">כן</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <label>בחר מותג (או צור חדש)</label>
+        <div class="inline">
+          <select id="vBrand"></select>
+          <button class="btn ghost tight" type="button" onclick="quickAddBrand()">+ מותג חדש</button>
+        </div>
+        <div class="note">אין שדה “שם שובר” — השם נגזר מהמותג/החנויות שבחרת.</div>
+      </div>
+
+      <div class="field">
+        <label>תחולת השובר</label>
+        <div class="inline">
+          <select id="vScope" onchange="renderVoucherFields()">
+            <option value="all" selected>תקף לכל הרשת</option>
+            <option value="stores">תקף רק לחנויות מסוימות</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field" id="storesField">
+        <label>חנויות תקפות (רב־בחירה)</label>
+        <div class="inline">
+          <select id="vStores" multiple size="6" style="height:160px;"></select>
+          <div class="tight" style="display:flex; flex-direction:column; gap:8px;">
+            <button class="btn ghost" type="button" onclick="quickAddStore()">+ חנות חדשה</button>
+            <button class="btn ghost" type="button" onclick="selectStoresOfBrand()">בחר חנויות של המותג</button>
+            <button class="btn ghost" type="button" onclick="clearStoresSelection()">נקה בחירה</button>
+          </div>
+        </div>
+        <div class="note">אם בחרת “תקף לכל הרשת” — אפשר להשאיר חנויות ריק (המערכת תציג לך חנויות עיקריות אם קיימות במותג).</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div id="moneyBlock" class="twoCols">
+        <div class="field">
+          <label>סכום שובר (₪)</label>
+          <input id="vTotal" type="number" inputmode="decimal" placeholder="למשל 500">
+        </div>
+        <div class="field">
+          <label>נוצל (₪)</label>
+          <input id="vUsed" type="number" inputmode="decimal" placeholder="למשל 200" oninput="recalcBalance()">
+        </div>
+        <div class="field">
+          <label>יתרה (₪)</label>
+          <input id="vBalance" class="readonly" type="number" inputmode="decimal" readonly>
+          <div class="note">מחושב אוטומטית: סכום שובר פחות נוצל.</div>
+        </div>
+      </div>
+
+      <div id="capBlock" class="twoCols" style="display:none;">
+        <div class="field">
+          <label>תיאור ההנחה</label>
+          <input id="vCapDesc" placeholder='למשל "20% הנחה עד 200₪"'>
+        </div>
+        <div class="field">
+          <label>תקרה (₪)</label>
+          <input id="vCapTotal" type="number" inputmode="decimal" placeholder="למשל 200">
+        </div>
+        <div class="field">
+          <label>נוצל מתוך התקרה (₪)</label>
+          <input id="vCapUsed" type="number" inputmode="decimal" placeholder="למשל 20" oninput="recalcBalance()">
+        </div>
+        <div class="field">
+          <label>יתרה (₪)</label>
+          <input id="vCapBalance" class="readonly" type="number" inputmode="decimal" readonly>
+        </div>
+      </div>
+
+      <div id="simpleDescBlock" style="display:none;">
+        <div class="field">
+          <label>פירוט / תיאור השובר</label>
+          <input id="vDesc" placeholder='למשל "10% הנחה", "1+1 על חולצות", "מבצע כללי"...'>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="twoCols">
+        <div class="field">
+          <label>תוקף (אופציונלי)</label>
+          <input type="date" id="vExpiry" onchange="renderVoucherFields()">
+          <div class="note" id="expiryHint"></div>
+        </div>
+
+        <div class="field" id="codeBlock">
+          <label>קוד / מספר כרטיס (אופציונלי)</label>
+          <div class="inline">
+            <input id="vCode" placeholder="הדבק כאן קוד...">
+            <button class="btn ghost tight" type="button" onclick="pasteInto('vCode')">הדבק</button>
+          </div>
+          <div class="note">במסך השובר יהיה כפתור “העתק קוד”.</div>
         </div>
       </div>
 
       <div class="field">
-        <label>סוג שובר</label>
-        <select id="cType" onchange="renderCouponTypeUI()">
-          <option value="כספי" selected>כספי</option>
-          <option value="אחוז" >אחוז</option>
-          <option value="1+1" >1+1</option>
-          <option value="פריט/מתנה" >פריט/מתנה</option>
-          <option value="כללי" >כללי</option>
-        </select>
-        <div class="note">ברירת מחדל: כספי.</div>
-      </div>
-
-      <div class="field">
-        <label>מותג</label>
-        <button class="btn ghost" type="button" onclick="openPickBrand()">בחר מותג</button>
-        <div class="note" id="pickedBrandLine">לא נבחר מותג</div>
-
-        <div class="inline" style="margin-top:10px;">
-          <input id="newBrandInline" placeholder="או צור מותג חדש כאן (לדוגמה: dream / LOVE)" />
-          <button class="btn primary fit" type="button" onclick="createBrandInline()">צור</button>
+        <label>הערות / תוכן נוסף</label>
+        <div class="inline">
+          <button class="btn ghost tight" type="button" onclick="pasteInto('vNotes')">הדבק</button>
         </div>
+        <textarea id="vNotes" placeholder="הדבק כאן פרטים נוספים / תנאים / מה שצריך..."></textarea>
+        <div id="pasteWarn" class="warn">אם ההדבקה האוטומטית לא עובדת — הדבק ידנית (לחיצה ארוכה → Paste).</div>
       </div>
 
-      <div class="field" id="scopeField" style="display:none;">
-        <label>תוקף השובר</label>
-        <select id="cScope" onchange="renderScopeUI()">
-          <option value="all" selected>תקף לכל הרשת</option>
-          <option value="some">רק חנויות מסוימות</option>
-        </select>
-        <div class="note">בחר מותג קודם — ואז תוכל להחליט אם זה לכל הרשת או רק חנויות מסוימות.</div>
-      </div>
-
-      <div class="field" id="storesField" style="display:none;">
-        <label id="storesLabel">חנויות תקפות</label>
-
-        <details class="dropdown">
-          <summary id="storesSummary">בחר חנויות</summary>
-          <div class="choiceList" id="storesChoices"></div>
-
-          <div class="inline" style="margin-top:10px;">
-            <input id="newStoreInline" placeholder="הוסף חנות חדשה (לדוגמה: פוקס)" />
-            <button class="btn primary fit" type="button" onclick="createStoreInline()">הוסף</button>
-          </div>
-        </details>
-
-        <div class="note" id="storesNote"></div>
-      </div>
-
-      <div class="field">
-        <label>קטגוריות (אופציונלי)</label>
-        <details class="dropdown">
-          <summary id="catsSummary">בחר קטגוריות</summary>
-          <div class="choiceList" id="catsChoices"></div>
-
-          <div class="inline" style="margin-top:10px;">
-            <input id="newCatInline" placeholder="הוסף קטגוריה חדשה (לדוגמה: ביגוד)" />
-            <button class="btn primary fit" type="button" onclick="createCategoryInline()">הוסף</button>
-          </div>
-        </details>
-      </div>
-
-      <div class="field">
-        <label>כרטיס פיזי</label>
-        <select id="cPhysical">
-          <option value="no" selected>לא</option>
-          <option value="yes">כן</option>
-        </select>
-      </div>
-
-      <div class="field" id="codeField">
-        <label>קוד (אופציונלי)</label>
-        <textarea id="cCode" placeholder="הדבק כאן קוד / מספר שובר / כל דבר שתרצה..."></textarea>
-        <div class="note">
-          בתוך שובר קיים יהיה כפתור “העתק קוד” (אם יש קוד).
-        </div>
-      </div>
-
-      <div class="field">
-        <label>תוקף (אופציונלי)</label>
-        <input type="date" id="cExpiry" />
-        <div class="note">פורמט תצוגה באפליקציה: dd/mm/yyyy</div>
-      </div>
-
-      <div class="amountsBlock" id="amountsBlock">
-        <div style="font-weight:900; margin-bottom:8px;">סכומים</div>
-        <div class="amountsGrid">
-          <div>
-            <label>סכום שובר (₪)</label>
-            <input id="cTotal" type="number" inputmode="decimal" placeholder="לדוגמה: 500" oninput="recalcRemaining()" />
-          </div>
-          <div>
-            <label>נוצל (₪)</label>
-            <input id="cUsed" type="number" inputmode="decimal" placeholder="לדוגמה: 200" oninput="recalcRemaining()" />
-          </div>
-          <div>
-            <label>יתרה (₪)</label>
-            <input id="cRemaining" class="readonly" type="number" readonly />
-          </div>
-        </div>
-        <div class="note">היתרה מחושבת אוטומטית: סכום פחות נוצל.</div>
-      </div>
-
-      <div class="field">
-        <label>הערות (אופציונלי)</label>
-        <textarea id="cNotes" placeholder="פרטים נוספים / תנאים / כל מה שתרצה..."></textarea>
-      </div>
-
-      <div class="hr"></div>
+      <div class="divider"></div>
 
       <div class="inline">
-        <button class="btn okbtn fit" type="button" onclick="markCouponConsumed()">סמן כנוצל / העבר לארכיון</button>
-        <button class="btn danger fit" type="button" onclick="deleteCoupon()">מחק שובר</button>
+        <button class="btn danger tight" type="button" id="deleteVoucherBtn" style="display:none;" onclick="deleteVoucher()">מחק שובר</button>
+        <button class="btn ghost tight" type="button" id="archiveVoucherBtn" style="display:none;" onclick="moveVoucherToArchive()">העבר לארכיון</button>
+        <button class="btn ghost tight" type="button" id="restoreVoucherBtn" style="display:none;" onclick="restoreVoucherFromArchive()">החזר לפעיל</button>
       </div>
-
-      <div class="note" id="couponModalHint"></div>
     </div>
   </div>
 
-  <!-- Picker modal (brand/store/cat + manage details) -->
-  <div id="pickerBackdrop" class="backdrop" onclick="closePickerModal(event)">
+  <!-- MODAL: Brand details -->
+  <div id="brandBackdrop" class="modal-backdrop" onclick="closeBrandModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
-      <div class="modalHeader">
-        <div class="modalTitle" id="pickerTitle">בחירה</div>
-        <div class="modalActions">
-          <button class="tiny" type="button" onclick="pickerConfirm()">אישור</button>
-          <button class="tiny" type="button" onclick="hidePicker()">סגור</button>
+      <div class="modal-header">
+        <div class="modal-title" id="brandModalTitle">מותג</div>
+        <div class="modal-actions">
+          <button class="tiny primary" type="button" onclick="saveBrandLinks()">שמירה</button>
+          <button class="tiny" type="button" onclick="hideBrandModal()">סגור</button>
         </div>
       </div>
 
       <div class="field">
-        <label>חיפוש</label>
-        <input id="pickerSearch" placeholder="חפש..." oninput="renderPickerList()" />
+        <label>עריכת שם מותג</label>
+        <div class="inline">
+          <input id="brandNameEdit">
+          <button class="btn ghost tight" type="button" onclick="renameBrand()">שנה שם</button>
+        </div>
       </div>
 
-      <div id="pickerList" class="choiceList"></div>
+      <div class="divider"></div>
 
-      <div class="hr"></div>
+      <div class="field">
+        <label>חנויות ששייכות למותג (רב־בחירה)</label>
+        <div class="inline">
+          <select id="brandStoresMulti" multiple size="10" style="height:220px;"></select>
+          <div class="tight" style="display:flex; flex-direction:column; gap:8px;">
+            <button class="btn ghost" type="button" onclick="quickAddStoreFromBrand()">+ חנות חדשה</button>
+            <button class="btn ghost" type="button" onclick="selectAllBrandStores()">בחר הכל</button>
+            <button class="btn ghost" type="button" onclick="clearAllBrandStores()">נקה</button>
+          </div>
+        </div>
+        <div class="note">זה ניהול קשרים. לא מוחק היסטוריה של שוברים שנוצרו בעבר.</div>
+      </div>
 
-      <div id="pickerBottom"></div>
+      <div class="divider"></div>
+
+      <button class="btn danger" type="button" onclick="deleteBrand()">מחק מותג</button>
+      <div class="note">מחיקה לא מוחקת שוברים שכבר נוצרו. רק מסירה מהרשימות לבחירה עתידית.</div>
+    </div>
+  </div>
+
+  <!-- MODAL: Store details -->
+  <div id="storeBackdrop" class="modal-backdrop" onclick="closeStoreModal(event)">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <div class="modal-title" id="storeModalTitle">חנות</div>
+        <div class="modal-actions">
+          <button class="tiny primary" type="button" onclick="saveStoreLinks()">שמירה</button>
+          <button class="tiny" type="button" onclick="hideStoreModal()">סגור</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>עריכת שם חנות</label>
+        <div class="inline">
+          <input id="storeNameEdit">
+          <button class="btn ghost tight" type="button" onclick="renameStore()">שנה שם</button>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field">
+        <label>שייך למותגים (רב־בחירה)</label>
+        <select id="storeBrandsMulti" multiple size="8" style="height:190px;"></select>
+      </div>
+
+      <div class="field">
+        <label>קטגוריות לחנות (רב־בחירה)</label>
+        <select id="storeCatsMulti" multiple size="8" style="height:190px;"></select>
+      </div>
+
+      <div class="divider"></div>
+
+      <button class="btn danger" type="button" onclick="deleteStore()">מחק חנות</button>
+      <div class="note">מחיקה לא מוחקת שוברים היסטוריים שכבר נוצרו.</div>
     </div>
   </div>
 
 <script>
-  // ===== Service Worker registration =====
+  /* ===== Service Worker registration ===== */
   (function(){
     if (!("serviceWorker" in navigator)) return;
     navigator.serviceWorker.register("./sw.js").catch(function(){});
   })();
 
-  // ===== Sync Config =====
+  /* ===== Sync Config ===== */
   var __isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 
+  // כתובת הענן שנתת לי:
   var SYNC_URL = "https://script.google.com/macros/s/AKfycbzq9M_mKke4GTDeVPIHHfF-NFu5Yb7MADNVdeaYiuIn_S4LmkqhYejJw7DT9vR7HZG6/exec";
-  var SYNC_TOKEN = "YANIR_COUPONS_T0K3N_9f0dA_2026";
 
+  // TOKEN מומצא (מוטמע כאן). שים אותו זהה גם ב-Apps Script שלך.
+  var SYNC_TOKEN = "COUPONS_TOKEN_9f3bA2_kP17";
+
+  // Device name: אצלך נחשוף, אצל שירלי נסתיר.
   var DEVICE_NAME = (function(){
-    var saved = localStorage.getItem("deviceName");
+    var saved = localStorage.getItem("deviceNameCoupons");
     if(saved) return saved;
-    var guess = __isIOS ? "שירלי" : "Yanir";
-    localStorage.setItem("deviceName", guess);
+    var guess = __isIOS ? "Shirli" : "Yanir";
+    localStorage.setItem("deviceNameCoupons", guess);
     return guess;
   })();
 
-  var META_KEY = "cloudMeta";
+  var META_KEY = "cloudMetaCoupons";
   var LAST_SYNC_AT_KEY = "lastSyncAtCoupons";
 
   function pad2(n){ return String(n).padStart(2,"0"); }
@@ -666,24 +742,6 @@
     if(!ms) return "";
     var d = new Date(ms);
     return d.getFullYear() + "-" + pad2(d.getMonth()+1) + "-" + pad2(d.getDate()) + " " + pad2(d.getHours()) + ":" + pad2(d.getMinutes());
-  }
-  function fmtDateIL(iso){
-    if(!iso) return "";
-    // iso YYYY-MM-DD
-    var parts = String(iso).split("-");
-    if(parts.length!==3) return iso;
-    return parts[2] + "/" + parts[1] + "/" + parts[0];
-  }
-  function isoDateMs(iso){
-    if(!iso) return 0;
-    return new Date(iso + "T00:00:00").getTime();
-  }
-  function todayISO(){ return new Date().toISOString().slice(0,10); }
-  function safeJSONParse(s, fallback){ try{ return JSON.parse(s); } catch(e){ return fallback; } }
-
-  function setSyncMsg(msg){
-    var el = document.getElementById("syncStatusLine");
-    if(el) el.textContent = msg || "";
   }
   function setLastSyncNow(){
     var now = Date.now();
@@ -696,39 +754,44 @@
     var v = Number(localStorage.getItem(LAST_SYNC_AT_KEY) || "0");
     el.textContent = v ? ("סונכרן לאחרונה: " + fmtDateTime(v)) : "סונכרן לאחרונה: —";
   }
+  function setSyncMsg(msg){
+    var el2 = document.getElementById("syncStatusLine");
+    if(el2) el2.textContent = msg || "";
+  }
+  function safeJSONParse(s, fallback){
+    try { return JSON.parse(s); } catch(e){ return fallback; }
+  }
   function getLocalMeta(){
     return safeJSONParse(localStorage.getItem(META_KEY) || "null", { updatedAt:0, updatedBy:"" });
   }
   function setLocalMeta(meta){
     localStorage.setItem(META_KEY, JSON.stringify(meta || { updatedAt:0, updatedBy:"" }));
   }
-
+  function localPayload(){
+    return {
+      brands: safeJSONParse(localStorage.getItem("brands") || "[]", []),
+      stores: safeJSONParse(localStorage.getItem("stores") || "[]", []),
+      categories: safeJSONParse(localStorage.getItem("categories") || "[]", []),
+      vouchers: safeJSONParse(localStorage.getItem("vouchers") || "[]", [])
+    };
+  }
   function doFetchJSON(url){
     return fetch(url, { cache:"no-store" }).then(function(r){ return r.json(); });
   }
 
-  function localPayload(){
-    return {
-      v: 1,
-      brands: brands,
-      stores: stores,
-      categories: categories,
-      links: links,
-      coupons: coupons
-    };
-  }
-
   function applyRemote(remote, meta){
-    // accept only expected structure
-    brands = Array.isArray(remote.brands) ? remote.brands : [];
-    stores = Array.isArray(remote.stores) ? remote.stores : [];
-    categories = Array.isArray(remote.categories) ? remote.categories : [];
-    links = remote.links && typeof remote.links==="object" ? remote.links : { brandStores:{}, brandCats:{}, storeBrands:{}, storeCats:{}, catBrands:{}, catStores:{} };
-    coupons = Array.isArray(remote.coupons) ? remote.coupons : [];
-
-    persistAll();
+    localStorage.setItem("brands", JSON.stringify(remote.brands || []));
+    localStorage.setItem("stores", JSON.stringify(remote.stores || []));
+    localStorage.setItem("categories", JSON.stringify(remote.categories || []));
+    localStorage.setItem("vouchers", JSON.stringify(remote.vouchers || []));
     setLocalMeta(meta || { updatedAt:0, updatedBy:"" });
 
+    brands = normalizeBrands(remote.brands || []);
+    stores = normalizeStores(remote.stores || []);
+    categories = normalizeCats(remote.categories || []);
+    vouchers = normalizeVouchers(remote.vouchers || []);
+
+    autoArchiveByRules(); // כולל תוקף/יתרה 0
     renderAll();
   }
 
@@ -755,29 +818,30 @@
   }
   window.syncPullNow = syncPullNow;
 
-  function syncPushNow(){
-    if(!confirm("לשלוח את הנתונים של המכשיר הזה לענן? (זה יחליף את מה שבענן)")) return;
-
-    setSyncMsg("שולח לענן...");
+  function doSyncSend(){
     var payloadStr = JSON.stringify(localPayload());
     var url = SYNC_URL
       + "?token=" + encodeURIComponent(SYNC_TOKEN)
       + "&write=1"
       + "&by=" + encodeURIComponent(DEVICE_NAME)
       + "&data=" + encodeURIComponent(payloadStr);
+    return doFetchJSON(url);
+  }
 
-    doFetchJSON(url)
+  function syncPushNow(){
+    setSyncMsg("שולח לענן...");
+    doSyncSend()
       .then(function(w){
         if(w && w.ok){
           setLocalMeta(w.meta || getLocalMeta());
           setSyncMsg("נשלח לענן ✅");
           setLastSyncNow();
         } else {
-          setSyncMsg("שליחה לענן נכשלה ❌");
+          setSyncMsg("שליחה נכשלה ❌");
         }
       })
       .catch(function(){
-        setSyncMsg("שליחה לענן נכשלה ❌");
+        setSyncMsg("שליחה נכשלה ❌");
       });
   }
   window.syncPushNow = syncPushNow;
@@ -787,13 +851,13 @@
     if(!el) return;
     if(DEVICE_NAME === "Yanir"){
       el.style.display = "block";
-      el.textContent = "הערה (רק אצלך): אם משהו לא מסתדר בין מכשירים — השתמש בכפתורים המודגשים: “משוך נתונים” / “שלח נתונים”.";
+      el.textContent = "הערה (רק אצלך): אם שירלי לא רואה עדכונים — תבקש ממנה ללחוץ 'משוך נתונים מהענן'.";
     } else {
       el.style.display = "none";
     }
   }
 
-  // ===== Backup / Restore =====
+  /* ===== Backup / Restore ===== */
   function backupNow(){
     try{
       var backup = {
@@ -814,7 +878,10 @@
       a.click();
       a.remove();
 
-      setTimeout(function(){ try{ URL.revokeObjectURL(url); }catch(e){} }, 1500);
+      setTimeout(function(){
+        try{ URL.revokeObjectURL(url); }catch(e){}
+      }, 1500);
+
       setSyncMsg("גיבוי נוצר ✅");
     } catch(e){
       alert("גיבוי נכשל");
@@ -843,7 +910,19 @@
           if(!obj || !obj.payload) throw new Error("bad");
 
           var p = obj.payload || {};
-          applyRemote(p, obj.meta || {updatedAt:0, updatedBy:""});
+          localStorage.setItem("brands", JSON.stringify(p.brands || []));
+          localStorage.setItem("stores", JSON.stringify(p.stores || []));
+          localStorage.setItem("categories", JSON.stringify(p.categories || []));
+          localStorage.setItem("vouchers", JSON.stringify(p.vouchers || []));
+          if(obj.meta) setLocalMeta(obj.meta);
+
+          brands = normalizeBrands(p.brands || []);
+          stores = normalizeStores(p.stores || []);
+          categories = normalizeCats(p.categories || []);
+          vouchers = normalizeVouchers(p.vouchers || []);
+
+          autoArchiveByRules();
+          renderAll();
 
           setSyncMsg("גיבוי נטען ✅");
         } catch(e){
@@ -858,15 +937,12 @@
   }
   window.restoreFromFile = restoreFromFile;
 
-  // ===== Storage =====
-  var KEY_BRANDS = "c_brands";
-  var KEY_STORES = "c_stores";
-  var KEY_CATS = "c_categories";
-  var KEY_LINKS = "c_links";
-  var KEY_COUPONS = "c_coupons";
+  /* ===== App data ===== */
+  var DAY = 24*60*60*1000;
+  var SOON_MS = 90*DAY; // 3 חודשים
 
-  function uid(prefix){ return (prefix||"id") + "_" + Math.random().toString(16).slice(2) + "_" + Date.now(); }
-  function normName(s){ return String(s||"").trim(); }
+  function uid(){ return "v_" + Math.random().toString(16).slice(2) + "_" + Date.now(); }
+
   function escapeHtml(s){
     s = String(s);
     return s.replace(/[&<>"']/g, function(m){
@@ -874,186 +950,95 @@
     });
   }
 
-  function loadDefault(key, def){
-    var v = safeJSONParse(localStorage.getItem(key), null);
-    return v==null ? def : v;
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
+  function isoToMs(d){
+    if(!d) return 0;
+    return new Date(d + "T00:00:00").getTime();
+  }
+  function fmtILDate(iso){
+    if(!iso) return "—";
+    var parts = String(iso).split("-");
+    if(parts.length !== 3) return iso;
+    return parts[2] + "/" + parts[1] + "/" + parts[0];
   }
 
-  // Entities have: {id, name, disabled:boolean}
-  var brands = loadDefault(KEY_BRANDS, [
-    {id: uid("b"), name:"Dream", disabled:false},
-    {id: uid("b"), name:"LOVE", disabled:false}
-  ]);
-  var stores = loadDefault(KEY_STORES, [
-    {id: uid("s"), name:"פוקס", disabled:false},
-    {id: uid("s"), name:"אמריקן איגל", disabled:false},
-    {id: uid("s"), name:"קסטרו", disabled:false}
-  ]);
-  var categories = loadDefault(KEY_CATS, [
-    {id: uid("k"), name:"ביגוד", disabled:false},
-    {id: uid("k"), name:"מסעדות", disabled:false}
-  ]);
-
-  // Links structure: store <-> brand, and both <-> categories
-  var links = loadDefault(KEY_LINKS, {
-    brandStores:{}, // brandId -> [storeId]
-    brandCats:{},   // brandId -> [catId]
-    storeBrands:{}, // storeId -> [brandId]
-    storeCats:{},   // storeId -> [catId]
-    catBrands:{},   // catId -> [brandId]
-    catStores:{}    // catId -> [storeId]
-  });
-
-  // Coupon structure:
-  // {
-  //  id, createdAt, updatedAt,
-  //  brandId,
-  //  scope: "all"|"some",
-  //  storeIds: [],
-  //  highlightStoreIds: [], // for scope all, optional favorites
-  //  catIds: [],
-  //  type,
-  //  physical:boolean,
-  //  code, notes,
-  //  expiryISO,
-  //  total:number|null, used:number|null,
-  //  consumedManual:boolean,
-  //  archived:boolean, archivedAt, archivedReason
-  // }
-  var coupons = loadDefault(KEY_COUPONS, []);
-
-  function persistAll(){
-    localStorage.setItem(KEY_BRANDS, JSON.stringify(brands));
-    localStorage.setItem(KEY_STORES, JSON.stringify(stores));
-    localStorage.setItem(KEY_CATS, JSON.stringify(categories));
-    localStorage.setItem(KEY_LINKS, JSON.stringify(links));
-    localStorage.setItem(KEY_COUPONS, JSON.stringify(coupons));
+  function normalizeBrands(raw){
+    return (raw || []).map(function(b){
+      b = b || {};
+      return {
+        id: String(b.id || uid()),
+        name: String(b.name || "").trim(),
+        storeIds: Array.isArray(b.storeIds) ? b.storeIds.map(String) : [],
+        disabled: !!b.disabled
+      };
+    }).filter(function(b){ return b.name; });
   }
-
-  function getById(arr, id){
-    for(var i=0;i<arr.length;i++){ if(arr[i].id===id) return arr[i]; }
-    return null;
+  function normalizeStores(raw){
+    return (raw || []).map(function(s){
+      s = s || {};
+      return {
+        id: String(s.id || uid()),
+        name: String(s.name || "").trim(),
+        brandIds: Array.isArray(s.brandIds) ? s.brandIds.map(String) : [],
+        catIds: Array.isArray(s.catIds) ? s.catIds.map(String) : [],
+        disabled: !!s.disabled
+      };
+    }).filter(function(s){ return s.name; });
   }
-  function isDisabledEntity(arr, id){
-    var x = getById(arr,id);
-    return x ? !!x.disabled : false;
-  }
-  function listActiveEntities(arr){
-    return arr.filter(function(x){ return !x.disabled; }).slice().sort(function(a,b){ return a.name.localeCompare(b.name,"he"); });
-  }
-  function ensureLinksArray(map, key){
-    if(!map[key]) map[key]=[];
-    if(!Array.isArray(map[key])) map[key]=[];
-    return map[key];
-  }
-  function setLink(map, key, arr){
-    map[key] = Array.isArray(arr) ? arr : [];
-  }
-  function uniq(arr){
-    var out=[]; var seen={};
-    (arr||[]).forEach(function(x){
-      if(x==null) return;
-      var k=String(x);
-      if(seen[k]) return;
-      seen[k]=1; out.push(x);
-    });
-    return out;
-  }
-  function removeFromArray(arr, val){
-    return (arr||[]).filter(function(x){ return x!==val; });
-  }
-
-  // ===== Auto-archive rules =====
-  var DAY = 24*60*60*1000;
-  var NEAR_DAYS = 90; // 3 months approx
-
-  function computeRemaining(c){
-    var total = Number(c.total || 0);
-    var used = Number(c.used || 0);
-    var rem = total - used;
-    if(!isFinite(rem)) rem = 0;
-    return Math.max(0, Math.round(rem*100)/100);
-  }
-  function hasValueType(t){
-    return (t==="כספי" || t==="אחוז");
-  }
-  function isExpired(c){
-    if(!c.expiryISO) return false;
-    var exp = isoDateMs(c.expiryISO);
-    if(!exp) return false;
-    // expiry day inclusive: we treat as expired if today > expiry
-    var now0 = isoDateMs(todayISO());
-    return now0 > exp;
-  }
-  function isNearExpiry(c){
-    if(!c.expiryISO) return false;
-    var exp = isoDateMs(c.expiryISO);
-    if(!exp) return false;
-    var now0 = isoDateMs(todayISO());
-    var diffDays = Math.floor((exp - now0)/DAY);
-    return diffDays >= 0 && diffDays <= NEAR_DAYS;
-  }
-  function isUnavailable(c){
-    // archived or expired or remaining=0 for value types or consumedManual for no-value
-    if(c.archived) return true;
-    if(isExpired(c)) return true;
-    if(hasValueType(c.type)){
-      return computeRemaining(c) <= 0;
-    }
-    return !!c.consumedManual;
-  }
-  function ensureArchiveState(c){
-    // If becomes unavailable -> move to archive automatically
-    var expired = isExpired(c);
-    var reason = "";
-    if(expired) reason = "פג תוקף";
-    else if(hasValueType(c.type) && computeRemaining(c)<=0) reason = "יתרה 0";
-    else if(!hasValueType(c.type) && c.consumedManual) reason = "נוצל";
-    else return c;
-
-    if(!c.archived){
-      c.archived = true;
-      c.archivedAt = Date.now();
-      c.archivedReason = reason || "לא זמין";
-      c.updatedAt = Date.now();
-    }
-    return c;
-  }
-  function normalizeCoupons(){
-    coupons = (coupons||[]).map(function(c){
+  function normalizeCats(raw){
+    return (raw || []).map(function(c){
       c = c || {};
-      if(!c.id) c.id = uid("c");
-      if(!c.createdAt) c.createdAt = Date.now();
-      if(!c.updatedAt) c.updatedAt = c.createdAt;
-      if(!c.type) c.type = "כספי";
-      if(c.scope!=="some") c.scope="all";
-      c.storeIds = Array.isArray(c.storeIds) ? uniq(c.storeIds) : [];
-      c.highlightStoreIds = Array.isArray(c.highlightStoreIds) ? uniq(c.highlightStoreIds) : [];
-      c.catIds = Array.isArray(c.catIds) ? uniq(c.catIds) : [];
-      c.code = String(c.code||"");
-      c.notes = String(c.notes||"");
-      c.expiryISO = c.expiryISO ? String(c.expiryISO) : "";
-      c.physical = !!c.physical;
-      c.total = (c.total==null || c.total==="") ? null : Number(c.total);
-      c.used = (c.used==null || c.used==="") ? null : Number(c.used);
-      if(hasValueType(c.type)){
-        if(c.total==null) c.total = 0;
-        if(c.used==null) c.used = 0;
-      } else {
-        c.total = null; c.used = null;
-      }
-      c.consumedManual = !!c.consumedManual;
-      c.archived = !!c.archived;
-      c.archivedAt = Number(c.archivedAt||0);
-      c.archivedReason = String(c.archivedReason||"");
-      return ensureArchiveState(c);
+      return { id:String(c.id||uid()), name:String(c.name||"").trim(), disabled:!!c.disabled };
+    }).filter(function(c){ return c.name; });
+  }
+  function normalizeVouchers(raw){
+    return (raw || []).map(function(v){
+      v = v || {};
+      return {
+        id: String(v.id || uid()),
+        createdAt: Number(v.createdAt || Date.now()),
+        updatedAt: Number(v.updatedAt || Date.now()),
+        updatedBy: String(v.updatedBy || ""),
+        archived: !!v.archived,
+
+        type: String(v.type || "money"),
+        physical: !!v.physical,
+
+        brandId: String(v.brandId || ""),
+        brandNameAtCreation: String(v.brandNameAtCreation || ""),
+        scope: String(v.scope || "all"), // all | stores
+        storeIds: Array.isArray(v.storeIds) ? v.storeIds.map(String) : [],
+        storeNamesAtCreation: Array.isArray(v.storeNamesAtCreation) ? v.storeNamesAtCreation.map(String) : [],
+
+        total: Number(v.total || 0),
+        used: Number(v.used || 0),
+
+        capDesc: String(v.capDesc || ""),
+        capTotal: Number(v.capTotal || 0),
+        capUsed: Number(v.capUsed || 0),
+
+        desc: String(v.desc || ""),
+        expiry: String(v.expiry || ""),
+        code: String(v.code || ""),
+        notes: String(v.notes || "")
+      };
     });
-    persistAll();
   }
 
-  normalizeCoupons();
+  function saveAll(){
+    localStorage.setItem("brands", JSON.stringify(brands));
+    localStorage.setItem("stores", JSON.stringify(stores));
+    localStorage.setItem("categories", JSON.stringify(categories));
+    localStorage.setItem("vouchers", JSON.stringify(vouchers));
+  }
 
-  // ===== Tabs =====
+  // Defaults (empty first install)
+  var brands = normalizeBrands(safeJSONParse(localStorage.getItem("brands") || "[]", []));
+  var stores = normalizeStores(safeJSONParse(localStorage.getItem("stores") || "[]", []));
+  var categories = normalizeCats(safeJSONParse(localStorage.getItem("categories") || "[]", []));
+  var vouchers = normalizeVouchers(safeJSONParse(localStorage.getItem("vouchers") || "[]", []));
+
+  /* ===== Tabs ===== */
   function showTab(key){
     var btns = document.querySelectorAll(".tabbtn");
     for(var i=0;i<btns.length;i++) btns[i].classList.remove("active");
@@ -1068,1555 +1053,1521 @@
     btns[idx].classList.add("active");
     document.getElementById(viewId).classList.add("active");
 
-    // render when switching
+    // Refresh current view
     if(key==="active") renderActive();
     if(key==="archive") renderArchive();
     if(key==="manage") renderManage();
-    if(key==="data") {
-      renderSyncLastLine();
-      showLocalNoteIfYanir();
-      renderDeviceCard();
-    }
+    if(key==="data") renderDataTab();
   }
   window.showTab = showTab;
 
-  // ===== Filters (Active/Archive) =====
-  var activeQuick = "all"; // all | near
-  var archiveQuick = "all";
+  /* ===== Device name UI (Yanir only) ===== */
+  function renderDataTab(){
+    renderSyncLastLine();
+    showLocalNoteIfYanir();
 
-  var activeFilters = { brandId:"", storeId:"", catId:"" };
-  var archiveFilters = { brandId:"", storeId:"", catId:"" };
-
-  function clearActiveFilters(){
-    document.getElementById("searchActive").value = "";
-    activeQuick = "all";
-    activeFilters = { brandId:"", storeId:"", catId:"" };
-    renderActive();
+    var deviceCard = document.getElementById("deviceCard");
+    if(deviceCard){
+      if(DEVICE_NAME === "Yanir"){
+        deviceCard.style.display = "block";
+        document.getElementById("deviceNameSelect").value = DEVICE_NAME;
+      } else {
+        deviceCard.style.display = "none";
+      }
+    }
   }
-  window.clearActiveFilters = clearActiveFilters;
-
-  function clearArchiveFilters(){
-    document.getElementById("searchArchive").value = "";
-    archiveQuick = "all";
-    archiveFilters = { brandId:"", storeId:"", catId:"" };
-    renderArchive();
+  function setDeviceNameFromUI(){
+    var sel = document.getElementById("deviceNameSelect");
+    if(!sel) return;
+    DEVICE_NAME = sel.value;
+    localStorage.setItem("deviceNameCoupons", DEVICE_NAME);
+    showLocalNoteIfYanir();
   }
-  window.clearArchiveFilters = clearArchiveFilters;
+  window.setDeviceNameFromUI = setDeviceNameFromUI;
 
-  function setActiveQuickFilter(x){
-    activeQuick = x;
-    renderActive();
+  /* ===== Helpers: find entities ===== */
+  function findBrandById(id){ return brands.find(function(b){return b.id===id;}) || null; }
+  function findStoreById(id){ return stores.find(function(s){return s.id===id;}) || null; }
+  function findCatById(id){ return categories.find(function(c){return c.id===id;}) || null; }
+
+  function brandNameForVoucher(v){
+    var b = findBrandById(v.brandId);
+    return (b && b.name) ? b.name : (v.brandNameAtCreation || "");
   }
-  window.setActiveQuickFilter = setActiveQuickFilter;
-
-  function setArchiveQuickFilter(x){
-    archiveQuick = x;
-    renderArchive();
-  }
-  window.setArchiveQuickFilter = setArchiveQuickFilter;
-
-  function buildFilterRows(){
-    // Active rows
-    buildEntityRow("activeBrandRow", "מותגים", listActiveEntities(brands), activeFilters.brandId, function(id){ activeFilters.brandId=id; renderActive(); }, true);
-    buildEntityRow("activeStoreRow", "חנויות", listActiveEntities(stores), activeFilters.storeId, function(id){ activeFilters.storeId=id; renderActive(); }, true);
-    buildEntityRow("activeCatRow", "קטגוריות", listActiveEntities(categories), activeFilters.catId, function(id){ activeFilters.catId=id; renderActive(); }, true);
-
-    // Archive rows
-    buildEntityRow("archiveBrandRow", "מותגים", listActiveEntities(brands), archiveFilters.brandId, function(id){ archiveFilters.brandId=id; renderArchive(); }, true);
-    buildEntityRow("archiveStoreRow", "חנויות", listActiveEntities(stores), archiveFilters.storeId, function(id){ archiveFilters.storeId=id; renderArchive(); }, true);
-    buildEntityRow("archiveCatRow", "קטגוריות", listActiveEntities(categories), archiveFilters.catId, function(id){ archiveFilters.catId=id; renderArchive(); }, true);
+  function storeNamesForVoucher(v){
+    var names = [];
+    if(v.storeIds && v.storeIds.length){
+      v.storeIds.forEach(function(id){
+        var s = findStoreById(id);
+        names.push((s && s.name) ? s.name : "");
+      });
+      names = names.filter(Boolean);
+      if(names.length) return names;
+    }
+    return (v.storeNamesAtCreation || []).filter(Boolean);
   }
 
-  function buildEntityRow(containerId, title, items, selectedId, onSelect, includeAny){
-    var host = document.getElementById(containerId);
+  function getBalance(v){
+    if(v.type==="money"){
+      var tot = Number(v.total||0);
+      var used = Number(v.used||0);
+      return Math.max(0, round2(tot - used));
+    }
+    if(v.type==="cap"){
+      var ct = Number(v.capTotal||0);
+      var cu = Number(v.capUsed||0);
+      return Math.max(0, round2(ct - cu));
+    }
+    // others: no balance
+    return null;
+  }
+  function round2(x){
+    x = Number(x||0);
+    return Math.round(x*100)/100;
+  }
+  function isExpired(v){
+    if(!v.expiry) return false;
+    var ms = isoToMs(v.expiry);
+    if(!ms) return false;
+    return ms < isoToMs(todayISO());
+  }
+  function isSoon(v){
+    if(!v.expiry) return false;
+    var ms = isoToMs(v.expiry);
+    if(!ms) return false;
+    var now = isoToMs(todayISO());
+    return (ms - now) <= SOON_MS && (ms - now) >= 0;
+  }
+
+  function voucherStatusClass(v){
+    // Priority: expired -> red? you asked: red for <3 months, but expired/mused should be gray.
+    // Rule we set: red overrides everything except "archived by reason used/expired"? Actually you approved red overrides all and gray for archived/expired.
+    // We'll implement:
+    // - If expired OR archived -> gray
+    // - Else if soon -> red
+    // - Else if monetary/cap:
+    //    - if balance==total => green (unused)
+    //    - if balance<total && balance>0 => yellow
+    //    - if balance==0 => gray (auto-archive will move)
+    // - Else:
+    //    - green (available)
+    if(v.archived || isExpired(v)) return "st-gray";
+    if(isSoon(v)) return "st-red";
+
+    if(v.type==="money"){
+      var tot = Number(v.total||0);
+      var bal = getBalance(v);
+      if(tot>0 && bal===tot) return "st-green";
+      if(tot>0 && bal>0 && bal<tot) return "st-yellow";
+      return "st-green";
+    }
+    if(v.type==="cap"){
+      var ct = Number(v.capTotal||0);
+      var cb = getBalance(v);
+      if(ct>0 && cb===ct) return "st-green";
+      if(ct>0 && cb>0 && cb<ct) return "st-yellow";
+      return "st-green";
+    }
+    // percent/bogo/general
+    return "st-green";
+  }
+
+  function voucherStatusIcon(v){
+    // Simple ticket icon
+    return "🎟️";
+  }
+
+  function autoArchiveByRules(){
+    var changed = false;
+    vouchers.forEach(function(v){
+      // auto archive if expiry passed OR balance 0 (money/cap)
+      if(!v.archived){
+        if(isExpired(v)){
+          v.archived = true;
+          changed = true;
+        } else if(v.type==="money"){
+          var bal = getBalance(v);
+          if(bal !== null && bal <= 0 && Number(v.total||0)>0){
+            v.archived = true;
+            changed = true;
+          }
+        } else if(v.type==="cap"){
+          var bal2 = getBalance(v);
+          if(bal2 !== null && bal2 <= 0 && Number(v.capTotal||0)>0){
+            v.archived = true;
+            changed = true;
+          }
+        }
+      }
+    });
+    if(changed){
+      saveAll();
+    }
+  }
+
+  /* ===== Filters / Sorting state ===== */
+  var filters = {
+    active: { state:"all", brandId:"", storeId:"", catId:"", sort:"smart" },
+    archive:{ state:"all", brandId:"", storeId:"", catId:"", sort:"date" }
+  };
+
+  function clearSearch(which){
+    if(which==="active") document.getElementById("searchInputActive").value = "";
+    else document.getElementById("searchInputArchive").value = "";
+    if(which==="active") renderActive();
+    else renderArchive();
+  }
+  window.clearSearch = clearSearch;
+
+  function buildChips(hostId, items, activeValue, onPick){
+    var host = document.getElementById(hostId);
+    if(!host) return;
     host.innerHTML = "";
-
-    // label-like pill
-    var lab = document.createElement("div");
-    lab.className = "badge";
-    lab.textContent = title;
-    host.appendChild(lab);
-
-    if(includeAny){
-      var anyBtn = document.createElement("button");
-      anyBtn.className = "pillbtn " + (!selectedId ? "active": "");
-      anyBtn.type="button";
-      anyBtn.textContent = "הכל";
-      anyBtn.onclick = function(){ onSelect(""); };
-      host.appendChild(anyBtn);
-    }
-
     items.forEach(function(it){
-      var b = document.createElement("button");
-      b.className = "pillbtn " + (selectedId===it.id ? "active":"");
-      b.type="button";
-      b.textContent = it.name;
-      b.onclick = function(){ onSelect(it.id); };
-      host.appendChild(b);
+      var d = document.createElement("div");
+      d.className = "chip" + (String(it.value)===String(activeValue) ? " active" : "");
+      d.textContent = it.label;
+      d.onclick = function(){ onPick(it.value); };
+      host.appendChild(d);
     });
   }
 
-  // ===== Status icon SVG =====
-  function ticketSVG(){
-    return '<svg viewBox="0 0 24 24" fill="none" aria-hidden="true">'+
-      '<path d="M4 7.5c0-.828.672-1.5 1.5-1.5h13c.828 0 1.5.672 1.5 1.5v2a2 2 0 0 0 0 4v2c0 .828-.672 1.5-1.5 1.5h-13C4.672 19 4 18.328 4 17.5v-2a2 2 0 0 0 0-4v-2Z" stroke="currentColor" stroke-width="2" />'+
-      '<path d="M9 8.5v9" stroke="currentColor" stroke-width="2" stroke-dasharray="2 2"/>'+
-    '</svg>';
+  function getAllBrandOptions(includeAll){
+    var arr = brands.filter(function(b){return !b.disabled;})
+      .slice().sort(function(a,b){ return a.name.localeCompare(b.name,"he"); })
+      .map(function(b){ return { value:b.id, label:b.name }; });
+    if(includeAll) arr.unshift({value:"", label:"הכל"});
+    return arr;
+  }
+  function getAllStoreOptions(includeAll){
+    var arr = stores.filter(function(s){return !s.disabled;})
+      .slice().sort(function(a,b){ return a.name.localeCompare(b.name,"he"); })
+      .map(function(s){ return { value:s.id, label:s.name }; });
+    if(includeAll) arr.unshift({value:"", label:"הכל"});
+    return arr;
+  }
+  function getAllCatOptions(includeAll){
+    var arr = categories.filter(function(c){return !c.disabled;})
+      .slice().sort(function(a,b){ return a.name.localeCompare(b.name,"he"); })
+      .map(function(c){ return { value:c.id, label:c.name }; });
+    if(includeAll) arr.unshift({value:"", label:"הכל"});
+    return arr;
   }
 
-  function getStatusClass(c){
-    // Precedence: gray (archived/unavailable) > red (near expiry) > yellow (partial) > green (full/active)
-    if(c.archived || isExpired(c) || (hasValueType(c.type) && computeRemaining(c)<=0) || (!hasValueType(c.type) && c.consumedManual)) return "s-gray";
+  function initFilterChips(){
+    // State chips (separate row with "הכל" and "קרוב לפקיעה")
+    var stateItems = [
+      {value:"all", label:"הכל"},
+      {value:"soon", label:"קרוב לפקיעה (3 חודשים)"}
+    ];
 
-    if(isNearExpiry(c)) return "s-red";
+    buildChips("chipsStateActive", stateItems, filters.active.state, function(v){ filters.active.state=v; renderActive(); });
+    buildChips("chipsBrandsActive", getAllBrandOptions(true), filters.active.brandId, function(v){ filters.active.brandId=v; renderActive(); });
+    buildChips("chipsStoresActive", getAllStoreOptions(true), filters.active.storeId, function(v){ filters.active.storeId=v; renderActive(); });
+    buildChips("chipsCatsActive", getAllCatOptions(true), filters.active.catId, function(v){ filters.active.catId=v; renderActive(); });
 
-    if(hasValueType(c.type)){
-      var used = Number(c.used||0);
-      var rem = computeRemaining(c);
-      if(used>0 && rem>0) return "s-yellow";
-      return "s-green";
+    var sortItemsActive = [
+      {value:"smart", label:"חכם (ברירת מחדל)"},
+      {value:"expiry", label:"תוקף"},
+      {value:"amount", label:"יתרה (גבוה→נמוך)"},
+      {value:"az", label:"א-ב"}
+    ];
+    buildChips("chipsSortActive", sortItemsActive, filters.active.sort, function(v){ filters.active.sort=v; renderActive(); });
+
+    buildChips("chipsStateArchive", stateItems, filters.archive.state, function(v){ filters.archive.state=v; renderArchive(); });
+    buildChips("chipsBrandsArchive", getAllBrandOptions(true), filters.archive.brandId, function(v){ filters.archive.brandId=v; renderArchive(); });
+    buildChips("chipsStoresArchive", getAllStoreOptions(true), filters.archive.storeId, function(v){ filters.archive.storeId=v; renderArchive(); });
+    buildChips("chipsCatsArchive", getAllCatOptions(true), filters.archive.catId, function(v){ filters.archive.catId=v; renderArchive(); });
+
+    var sortItemsArchive = [
+      {value:"date", label:"תאריך עדכון"},
+      {value:"expiry", label:"תוקף"},
+      {value:"az", label:"א-ב"}
+    ];
+    buildChips("chipsSortArchive", sortItemsArchive, filters.archive.sort, function(v){ filters.archive.sort=v; renderArchive(); });
+  }
+
+  /* ===== Render Active / Archive ===== */
+  function matchesSearch(v, q){
+    q = (q||"").trim().toLowerCase();
+    if(!q) return true;
+    var bn = brandNameForVoucher(v).toLowerCase();
+    var storesN = storeNamesForVoucher(v).join(" ").toLowerCase();
+    var notes = String(v.notes||"").toLowerCase();
+    var code = String(v.code||"").toLowerCase();
+    var desc = String(v.desc||"").toLowerCase();
+    var capDesc = String(v.capDesc||"").toLowerCase();
+    return (bn.indexOf(q)>=0) || (storesN.indexOf(q)>=0) || (notes.indexOf(q)>=0) || (code.indexOf(q)>=0) || (desc.indexOf(q)>=0) || (capDesc.indexOf(q)>=0);
+  }
+
+  function voucherHasStore(v, storeId){
+    if(!storeId) return true;
+    return (v.storeIds||[]).indexOf(storeId)>=0;
+  }
+  function voucherHasBrand(v, brandId){
+    if(!brandId) return true;
+    return String(v.brandId||"") === String(brandId);
+  }
+
+  function voucherHasCategory(v, catId){
+    if(!catId) return true;
+    var storeIds = v.storeIds || [];
+    // If voucher scope is all and stores empty, we try brand's primary stores too
+    var effectiveStores = storeIds.slice();
+    if((v.scope==="all" || !effectiveStores.length) && v.brandId){
+      var b = findBrandById(v.brandId);
+      if(b && b.storeIds && b.storeIds.length){
+        b.storeIds.forEach(function(id){ if(effectiveStores.indexOf(id)<0) effectiveStores.push(id); });
+      }
     }
-    // no-value types: active = green unless near expiry (handled above)
-    return "s-green";
+    for(var i=0;i<effectiveStores.length;i++){
+      var s = findStoreById(effectiveStores[i]);
+      if(s && (s.catIds||[]).indexOf(catId)>=0) return true;
+    }
+    return false;
   }
 
-  // ===== Sorting =====
-  function brandFrequencyMap(activeOnly){
-    var map = {};
-    (coupons||[]).forEach(function(c){
-      if(activeOnly && c.archived) return;
-      if(!c.brandId) return;
-      map[c.brandId] = (map[c.brandId]||0) + 1;
+  function getBrandUsageCounts(activeOnly){
+    var counts = {};
+    vouchers.forEach(function(v){
+      if(activeOnly && v.archived) return;
+      var bid = String(v.brandId||"");
+      if(!bid) return;
+      counts[bid] = (counts[bid]||0) + 1;
     });
-    return map;
+    return counts;
   }
 
-  function sortActiveCoupons(list){
-    var freq = brandFrequencyMap(true);
-    return list.slice().sort(function(a,b){
-      // near-expiry first (<= 3 months) regardless
-      var an = isNearExpiry(a) ? 1:0;
-      var bn = isNearExpiry(b) ? 1:0;
-      if(bn!==an) return bn-an;
+  function smartSort(arr){
+    // Priority: soon first (but not expired/archived), then brand frequency desc, then balance desc, then alphabet
+    var brandCounts = getBrandUsageCounts(true);
 
-      // brand frequency desc
-      var af = freq[a.brandId]||0;
-      var bf = freq[b.brandId]||0;
-      if(bf!==af) return bf-af;
+    arr.sort(function(a,b){
+      var aSoon = (!a.archived && isSoon(a) && !isExpired(a)) ? 1 : 0;
+      var bSoon = (!b.archived && isSoon(b) && !isExpired(b)) ? 1 : 0;
+      if(bSoon !== aSoon) return bSoon - aSoon;
 
-      // remaining desc (only if value)
-      var ar = hasValueType(a.type) ? computeRemaining(a) : 0;
-      var br = hasValueType(b.type) ? computeRemaining(b) : 0;
-      if(br!==ar) return br-ar;
+      var ac = brandCounts[String(a.brandId||"")] || 0;
+      var bc = brandCounts[String(b.brandId||"")] || 0;
+      if(bc !== ac) return bc - ac;
 
-      // alphabetical by brand then id
-      var ab = (getById(brands,a.brandId)||{name:""}).name || "";
-      var bb = (getById(brands,b.brandId)||{name:""}).name || "";
-      var cmp = ab.localeCompare(bb,"he");
-      if(cmp!==0) return cmp;
+      var ab = getBalance(a); var bb = getBalance(b);
+      ab = (ab==null ? -1 : ab); bb = (bb==null ? -1 : bb);
+      if(bb !== ab) return bb - ab;
 
-      return String(a.id).localeCompare(String(b.id));
+      var an = brandNameForVoucher(a) || "";
+      var bn = brandNameForVoucher(b) || "";
+      return an.localeCompare(bn,"he");
     });
   }
 
-  function sortArchiveCoupons(list){
-    return list.slice().sort(function(a,b){
-      return (b.archivedAt||0) - (a.archivedAt||0);
+  function sortByExpiry(arr){
+    arr.sort(function(a,b){
+      var ae = isoToMs(a.expiry||"") || 9999999999999;
+      var be = isoToMs(b.expiry||"") || 9999999999999;
+      if(ae!==be) return ae - be;
+      return (brandNameForVoucher(a)||"").localeCompare(brandNameForVoucher(b)||"","he");
     });
   }
 
-  // ===== Display title line rules =====
-  function couponDisplayTitle(c){
-    var brand = getById(brands, c.brandId);
-    var bname = brand ? brand.name : "מותג לא ידוע";
-
-    // If store-specific (some), show brand then first store
-    if(c.scope==="some"){
-      var st = (c.storeIds||[]).map(function(id){ return getById(stores,id); }).filter(Boolean);
-      var first = st.length ? st[0].name : "";
-      if(first) return bname + " — " + first;
-      return bname;
-    }
-
-    // all network: show brand + up to 2 highlighted stores (if exist)
-    var hs = (c.highlightStoreIds||[]).map(function(id){ return getById(stores,id); }).filter(Boolean).map(function(x){return x.name;});
-    if(hs.length){
-      var shown = hs.slice(0,2);
-      var extra = hs.length - shown.length;
-      return bname + " — " + shown.join(", ") + (extra>0 ? " +" + extra : "");
-    }
-    return bname;
+  function sortByAmount(arr){
+    arr.sort(function(a,b){
+      var ab = getBalance(a); var bb = getBalance(b);
+      ab = (ab==null ? -1 : ab); bb = (bb==null ? -1 : bb);
+      if(bb!==ab) return bb - ab;
+      return (brandNameForVoucher(a)||"").localeCompare(brandNameForVoucher(b)||"","he");
+    });
   }
 
-  function couponStoresLine(c){
-    // If scope some -> list stores
-    if(c.scope==="some"){
-      var st = (c.storeIds||[]).map(function(id){ return getById(stores,id); }).filter(Boolean).map(function(x){return x.name;});
-      if(!st.length) return "";
-      return "רק בחנויות: " + st.slice(0,3).join(", ") + (st.length>3 ? " +" + (st.length-3) : "");
-    }
-
-    // scope all: if highlight stores exist show them, else show nothing (no "-")
-    var hs = (c.highlightStoreIds||[]).map(function(id){ return getById(stores,id); }).filter(Boolean).map(function(x){return x.name;});
-    if(hs.length){
-      return "חנויות עיקריות: " + hs.slice(0,3).join(", ") + (hs.length>3 ? " +" + (hs.length-3) : "");
-    }
-    return "";
+  function sortAZ(arr){
+    arr.sort(function(a,b){
+      return (brandNameForVoucher(a)||"").localeCompare(brandNameForVoucher(b)||"","he");
+    });
   }
 
-  function couponSearchText(c){
-    var brand = getById(brands, c.brandId);
-    var bname = brand ? brand.name : "";
-    var storeNames = (c.storeIds||[]).concat(c.highlightStoreIds||[]).map(function(id){
-      var s = getById(stores,id); return s ? s.name : "";
-    }).join(" ");
-    var notes = (c.notes||"");
-    return (bname + " " + storeNames + " " + notes).toLowerCase();
+  function sortArchive(arr){
+    if(filters.archive.sort==="expiry") return sortByExpiry(arr);
+    if(filters.archive.sort==="az") return sortAZ(arr);
+    // date (updatedAt desc)
+    arr.sort(function(a,b){ return (b.updatedAt||0)-(a.updatedAt||0); });
   }
 
-  // ===== Render Active / Archive =====
-  function matchesFilters(c, quick, f, searchText){
-    // apply quick filter
-    if(quick==="near" && !isNearExpiry(c)) return false;
+  function buildVoucherSubtitle(v){
+    var bn = brandNameForVoucher(v);
+    var sNames = storeNamesForVoucher(v);
 
-    // brand filter
-    if(f.brandId && c.brandId !== f.brandId) return false;
+    if(v.scope==="all"){
+      // show main stores if exist
+      var b = findBrandById(v.brandId);
+      var mains = [];
+      if(b && b.storeIds && b.storeIds.length){
+        b.storeIds.forEach(function(id){
+          var s = findStoreById(id);
+          if(s && s.name) mains.push(s.name);
+        });
+      }
+      if(!mains.length && sNames.length) mains = sNames.slice();
 
-    // store filter: match in either storeIds or highlightStoreIds
-    if(f.storeId){
-      var all = (c.storeIds||[]).concat(c.highlightStoreIds||[]);
-      if(all.indexOf(f.storeId)<0) return false;
+      if(!mains.length){
+        return "כל הרשת";
+      }
+      var shown = mains.slice(0,2);
+      var rest = mains.length - shown.length;
+      return "כל הרשת · " + shown.join(" · ") + (rest>0 ? ("  +" + rest) : "");
+    } else {
+      if(!sNames.length){
+        return "חנויות: —";
+      }
+      var shown2 = sNames.slice(0,2);
+      var rest2 = sNames.length - shown2.length;
+      return shown2.join(" · ") + (rest2>0 ? ("  +" + rest2) : "");
+    }
+  }
+
+  function buildVoucherMetaPills(v){
+    var pills = [];
+    // type
+    var typeLabel = {
+      money:"כספי",
+      cap:"תקרה",
+      percent:"אחוזים",
+      bogo:"1+1",
+      general:"כללי"
+    }[v.type] || "כללי";
+    pills.push(typeLabel);
+
+    // expiry
+    if(v.expiry){
+      pills.push("תוקף: " + fmtILDate(v.expiry));
     }
 
-    // cat filter: coupon catIds
-    if(f.catId){
-      if((c.catIds||[]).indexOf(f.catId)<0) return false;
+    // amounts
+    var bal = getBalance(v);
+    if(v.type==="money"){
+      pills.push("יתרה: ₪" + (bal==null ? "—" : bal));
+    }
+    if(v.type==="cap"){
+      pills.push("נותר מהתקרה: ₪" + (bal==null ? "—" : bal));
     }
 
-    // search
-    if(searchText){
-      var hay = couponSearchText(c);
-      if(hay.indexOf(searchText)<0) return false;
+    // physical
+    if(v.physical){
+      pills.push("כרטיס פיזי");
     }
 
-    return true;
+    return pills;
+  }
+
+  function renderVoucherCard(v, host){
+    var bn = brandNameForVoucher(v);
+    var subtitle = buildVoucherSubtitle(v);
+
+    var card = document.createElement("div");
+    card.className = "vcard";
+
+    var top = document.createElement("div");
+    top.className = "vtop";
+
+    var titleWrap = document.createElement("div");
+    titleWrap.style.minWidth = "0";
+    titleWrap.style.flex = "1";
+
+    var title = document.createElement("div");
+    title.className = "vtitle";
+    title.innerHTML = '<span style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">'+escapeHtml(bn || "(ללא מותג)")+'</span>';
+
+    var sub = document.createElement("div");
+    sub.className = "vsubtitle";
+    sub.textContent = subtitle;
+
+    titleWrap.appendChild(title);
+    titleWrap.appendChild(sub);
+
+    var left = document.createElement("div");
+    left.className = "leftActions";
+
+    var st = document.createElement("div");
+    st.className = "statusIcon " + voucherStatusClass(v);
+    st.title = "סטטוס";
+    st.textContent = voucherStatusIcon(v);
+
+    var open = document.createElement("button");
+    open.className = "openBtn";
+    open.type = "button";
+    open.textContent = "פתח";
+    open.onclick = function(){ openVoucherView(v.id); };
+
+    left.appendChild(st);
+    left.appendChild(open);
+
+    top.appendChild(titleWrap);
+    top.appendChild(left);
+
+    var meta = document.createElement("div");
+    meta.className = "vmeta";
+    buildVoucherMetaPills(v).forEach(function(p){
+      var pill = document.createElement("span");
+      pill.className = "pill";
+      pill.textContent = p;
+      meta.appendChild(pill);
+    });
+
+    card.appendChild(top);
+    card.appendChild(meta);
+
+    host.appendChild(card);
+  }
+
+  function filterVoucherList(mode){
+    autoArchiveByRules();
+
+    var f = filters[mode];
+    var q = (mode==="active")
+      ? (document.getElementById("searchInputActive").value || "")
+      : (document.getElementById("searchInputArchive").value || "");
+
+    var list = vouchers.slice().filter(function(v){
+      if(mode==="active" && v.archived) return false;
+      if(mode==="archive" && !v.archived) return false;
+
+      if(f.state==="soon"){
+        if(!(isSoon(v) && !isExpired(v) && !v.archived)) return false;
+      }
+
+      if(f.brandId && !voucherHasBrand(v, f.brandId)) return false;
+      if(f.storeId && !voucherHasStore(v, f.storeId)) return false;
+      if(f.catId && !voucherHasCategory(v, f.catId)) return false;
+
+      if(!matchesSearch(v, q)) return false;
+      return true;
+    });
+
+    // Sorting
+    if(mode==="active"){
+      if(f.sort==="smart") smartSort(list);
+      else if(f.sort==="expiry") sortByExpiry(list);
+      else if(f.sort==="amount") sortByAmount(list);
+      else if(f.sort==="az") sortAZ(list);
+      else smartSort(list);
+    } else {
+      sortArchive(list);
+    }
+
+    return list;
   }
 
   function renderActive(){
-    normalizeCoupons();
-    buildFilterRows();
-
-    // quick buttons highlight
-    document.getElementById("actFilterAll").classList.toggle("active", activeQuick==="all");
-    document.getElementById("actFilterNear").classList.toggle("active", activeQuick==="near");
-
-    var q = (document.getElementById("searchActive").value || "").trim().toLowerCase();
-
-    var list = coupons.filter(function(c){
-      // active means NOT archived
-      if(c.archived) return false;
-      // if expired or remaining 0 etc, normalizeCoupons should have archived it already
-      return matchesFilters(c, activeQuick, activeFilters, q);
-    });
-
-    list = sortActiveCoupons(list);
-
-    document.getElementById("activeCount").textContent = "מוצגים: " + list.length;
-
+    initFilterChips();
     var host = document.getElementById("activeList");
     host.innerHTML = "";
-    if(!list.length){
-      host.innerHTML = '<div class="note">אין שוברים להצגה.</div>';
-      return;
-    }
-
-    list.forEach(function(c){
-      host.appendChild(renderCouponCard(c, false));
-    });
+    var list = filterVoucherList("active");
+    document.getElementById("activeCount").textContent = String(list.length);
+    document.getElementById("activeEmpty").style.display = list.length ? "none" : "block";
+    list.forEach(function(v){ renderVoucherCard(v, host); });
   }
+  window.renderActive = renderActive;
 
   function renderArchive(){
-    normalizeCoupons();
-    buildFilterRows();
-
-    document.getElementById("arcFilterAll").classList.toggle("active", archiveQuick==="all");
-    document.getElementById("arcFilterNear").classList.toggle("active", archiveQuick==="near");
-
-    var q = (document.getElementById("searchArchive").value || "").trim().toLowerCase();
-
-    var list = coupons.filter(function(c){
-      if(!c.archived) return false;
-      return matchesFilters(c, archiveQuick, archiveFilters, q);
-    });
-
-    list = sortArchiveCoupons(list);
-
-    document.getElementById("archiveCount").textContent = "מוצגים: " + list.length;
-
+    initFilterChips();
     var host = document.getElementById("archiveList");
     host.innerHTML = "";
-    if(!list.length){
-      host.innerHTML = '<div class="note">אין פריטים בארכיון להצגה.</div>';
-      return;
+    var list = filterVoucherList("archive");
+    document.getElementById("archiveCount").textContent = String(list.length);
+    document.getElementById("archiveEmpty").style.display = list.length ? "none" : "block";
+    list.forEach(function(v){ renderVoucherCard(v, host); });
+  }
+  window.renderArchive = renderArchive;
+
+  /* ===== Voucher modal logic ===== */
+  var voucherEditingId = null;
+
+  function openVoucherCreate(){
+    voucherEditingId = null;
+    document.getElementById("voucherModalTitle").textContent = "יצירת שובר חדש";
+    document.getElementById("deleteVoucherBtn").style.display = "none";
+    document.getElementById("archiveVoucherBtn").style.display = "none";
+    document.getElementById("restoreVoucherBtn").style.display = "none";
+
+    fillBrandSelect();
+    fillStoresSelect();
+
+    // Defaults: type money, physical no, scope all
+    document.getElementById("vType").value = "money";
+    document.getElementById("vPhysical").value = "0";
+    document.getElementById("vScope").value = "all";
+
+    document.getElementById("vBrand").value = brands.filter(function(b){return !b.disabled;})[0]?.id || "";
+    clearStoresSelection();
+
+    document.getElementById("vTotal").value = "";
+    document.getElementById("vUsed").value = "";
+    document.getElementById("vBalance").value = "";
+
+    document.getElementById("vCapDesc").value = "";
+    document.getElementById("vCapTotal").value = "";
+    document.getElementById("vCapUsed").value = "";
+    document.getElementById("vCapBalance").value = "";
+
+    document.getElementById("vDesc").value = "";
+
+    document.getElementById("vExpiry").value = "";
+    document.getElementById("vCode").value = "";
+    document.getElementById("vNotes").value = "";
+    document.getElementById("pasteWarn").style.display = "none";
+
+    renderVoucherFields();
+
+    document.getElementById("voucherBackdrop").style.display = "flex";
+  }
+  window.openVoucherCreate = openVoucherCreate;
+
+  function openVoucherView(id){
+    var v = vouchers.find(function(x){return x.id===id;});
+    if(!v) return;
+    voucherEditingId = id;
+
+    document.getElementById("voucherModalTitle").textContent = v.archived ? "שובר (ארכיון)" : "שובר";
+    document.getElementById("deleteVoucherBtn").style.display = "inline-flex";
+    document.getElementById("archiveVoucherBtn").style.display = v.archived ? "none" : "inline-flex";
+    document.getElementById("restoreVoucherBtn").style.display = v.archived ? "inline-flex" : "none";
+
+    fillBrandSelect();
+    fillStoresSelect();
+
+    document.getElementById("vType").value = v.type || "money";
+    document.getElementById("vPhysical").value = v.physical ? "1" : "0";
+    document.getElementById("vScope").value = v.scope || "all";
+
+    document.getElementById("vBrand").value = v.brandId || "";
+
+    // Select stores
+    clearStoresSelection();
+    var ms = document.getElementById("vStores");
+    var set = {};
+    (v.storeIds||[]).forEach(function(x){ set[x]=true; });
+    for(var i=0;i<ms.options.length;i++){
+      var opt = ms.options[i];
+      opt.selected = !!set[opt.value];
     }
 
-    list.forEach(function(c){
-      host.appendChild(renderCouponCard(c, true));
+    document.getElementById("vTotal").value = (v.total||0) ? String(v.total) : "";
+    document.getElementById("vUsed").value = (v.used||0) ? String(v.used) : "";
+    document.getElementById("vBalance").value = String(getBalance(v) ?? "");
+
+    document.getElementById("vCapDesc").value = v.capDesc || "";
+    document.getElementById("vCapTotal").value = (v.capTotal||0) ? String(v.capTotal) : "";
+    document.getElementById("vCapUsed").value = (v.capUsed||0) ? String(v.capUsed) : "";
+    document.getElementById("vCapBalance").value = String(getBalance(v) ?? "");
+
+    document.getElementById("vDesc").value = v.desc || "";
+
+    document.getElementById("vExpiry").value = v.expiry || "";
+    document.getElementById("vCode").value = v.code || "";
+    document.getElementById("vNotes").value = v.notes || "";
+    document.getElementById("pasteWarn").style.display = "none";
+
+    renderVoucherFields();
+    document.getElementById("voucherBackdrop").style.display = "flex";
+  }
+  window.openVoucherView = openVoucherView;
+
+  function hideVoucherModal(){
+    document.getElementById("voucherBackdrop").style.display = "none";
+    voucherEditingId = null;
+  }
+  window.hideVoucherModal = hideVoucherModal;
+
+  function closeVoucherModal(e){
+    if(e.target === document.getElementById("voucherBackdrop")) hideVoucherModal();
+  }
+  window.closeVoucherModal = closeVoucherModal;
+
+  function fillBrandSelect(){
+    var sel = document.getElementById("vBrand");
+    sel.innerHTML = "";
+    var act = brands.filter(function(b){return !b.disabled;}).slice().sort(function(a,b){return a.name.localeCompare(b.name,"he");});
+    act.forEach(function(b){
+      var o = document.createElement("option");
+      o.value = b.id;
+      o.textContent = b.name;
+      sel.appendChild(o);
+    });
+    if(!act.length){
+      var o2 = document.createElement("option");
+      o2.value = "";
+      o2.textContent = "— אין מותגים —";
+      sel.appendChild(o2);
+    }
+  }
+
+  function fillStoresSelect(){
+    var sel = document.getElementById("vStores");
+    sel.innerHTML = "";
+    var act = stores.filter(function(s){return !s.disabled;}).slice().sort(function(a,b){return a.name.localeCompare(b.name,"he");});
+    act.forEach(function(s){
+      var o = document.createElement("option");
+      o.value = s.id;
+      o.textContent = s.name;
+      sel.appendChild(o);
     });
   }
 
-  function renderCouponCard(c, isArchive){
-    var card = document.createElement("div");
-    card.className = "couponCard";
-
-    var top = document.createElement("div");
-    top.className = "couponTop";
-
-    var left = document.createElement("div");
-    left.style.minWidth = "0";
-    left.style.flex = "1";
-
-    var title = document.createElement("div");
-    title.className = "couponTitle";
-    title.textContent = couponDisplayTitle(c);
-
-    var meta = document.createElement("div");
-    meta.className = "couponMeta";
-
-    // Type badge
-    var tBadge = document.createElement("span");
-    tBadge.className = "badge";
-    tBadge.textContent = "סוג: " + (c.type||"");
-    meta.appendChild(tBadge);
-
-    // Physical
-    if(c.physical){
-      var pBadge = document.createElement("span");
-      pBadge.className = "badge";
-      pBadge.textContent = "כרטיס פיזי";
-      meta.appendChild(pBadge);
+  function getSelectedValues(selectEl){
+    var out = [];
+    for(var i=0;i<selectEl.options.length;i++){
+      if(selectEl.options[i].selected) out.push(selectEl.options[i].value);
     }
-
-    // Expiry
-    if(c.expiryISO){
-      var expB = document.createElement("span");
-      var near = isNearExpiry(c);
-      var expd = isExpired(c);
-      expB.className = "badge " + (expd ? "gray" : near ? "red" : "soft");
-      expB.textContent = "תוקף: " + fmtDateIL(c.expiryISO);
-      meta.appendChild(expB);
-    }
-
-    // Amount info
-    if(hasValueType(c.type)){
-      var rem = computeRemaining(c);
-      var used = Number(c.used||0);
-
-      var b = document.createElement("span");
-      var cls = "green";
-      if(isNearExpiry(c)) cls = "red";
-      else if(used>0 && rem>0) cls = "yellow";
-      b.className = "badge " + cls;
-      b.textContent = "יתרה: ₪" + rem;
-      meta.appendChild(b);
-    }
-
-    // Store line if needed
-    var storeLine = couponStoresLine(c);
-    if(storeLine){
-      var sB = document.createElement("span");
-      sB.className = "badge";
-      sB.textContent = storeLine;
-      meta.appendChild(sB);
-    }
-
-    left.appendChild(title);
-    left.appendChild(meta);
-
-    var actions = document.createElement("div");
-    actions.className = "actions";
-
-    // Status icon on the left of "Open" (as requested)
-    var icon = document.createElement("div");
-    icon.className = "statusIcon " + getStatusClass(c);
-    icon.innerHTML = ticketSVG();
-    actions.appendChild(icon);
-
-    var open = document.createElement("button");
-    open.className = "openbtn";
-    open.type="button";
-    open.textContent = "פתח";
-    open.onclick = function(){ openCouponEditor(c.id); };
-    actions.appendChild(open);
-
-    top.appendChild(left);
-    top.appendChild(actions);
-
-    card.appendChild(top);
-    return card;
+    return out;
   }
 
-  // ===== Coupon editor modal =====
-  var editingCouponId = null;
-  var pickedBrandId = "";
-  var pickedStoreIds = [];
-  var pickedHighlightStoreIds = [];
-  var pickedCatIds = [];
+  function clearStoresSelection(){
+    var ms = document.getElementById("vStores");
+    if(!ms) return;
+    for(var i=0;i<ms.options.length;i++) ms.options[i].selected = false;
+  }
+  window.clearStoresSelection = clearStoresSelection;
 
-  function openCouponEditor(couponId){
-    editingCouponId = couponId;
-    var c = couponId ? getCouponById(couponId) : null;
-
-    document.getElementById("couponModalTitle").textContent = couponId ? "✏️ עריכת שובר" : "➕ יצירת שובר חדש";
-    document.getElementById("couponModalHint").textContent = "";
-
-    // defaults
-    document.getElementById("cType").value = (c && c.type) ? c.type : "כספי"; // default monetary
-    document.getElementById("cPhysical").value = (c && c.physical) ? "yes" : "no";
-    document.getElementById("cCode").value = c ? (c.code||"") : "";
-    document.getElementById("cNotes").value = c ? (c.notes||"") : "";
-    document.getElementById("cExpiry").value = c ? (c.expiryISO||"") : "";
-
-    // brand / stores / cats
-    pickedBrandId = c ? (c.brandId||"") : "";
-    pickedStoreIds = c ? (c.storeIds||[]) : [];
-    pickedHighlightStoreIds = c ? (c.highlightStoreIds||[]) : [];
-    pickedCatIds = c ? (c.catIds||[]) : [];
-
-    // scope hidden until brand chosen
-    document.getElementById("scopeField").style.display = pickedBrandId ? "block" : "none";
-    document.getElementById("storesField").style.display = pickedBrandId ? "block" : "none";
-
-    document.getElementById("cScope").value = c ? (c.scope||"all") : "all";
-
-    // amounts
-    if(hasValueType(document.getElementById("cType").value)){
-      document.getElementById("amountsBlock").style.display = "block";
-      document.getElementById("cTotal").value = c ? Number(c.total||0) : "";
-      document.getElementById("cUsed").value = c ? Number(c.used||0) : "";
-    } else {
-      document.getElementById("amountsBlock").style.display = "none";
-      document.getElementById("cTotal").value = "";
-      document.getElementById("cUsed").value = "";
-      document.getElementById("cRemaining").value = "";
+  function selectStoresOfBrand(){
+    var brandId = document.getElementById("vBrand").value;
+    if(!brandId) return;
+    var b = findBrandById(brandId);
+    if(!b) return;
+    var set = {};
+    (b.storeIds||[]).forEach(function(x){ set[x]=true; });
+    var ms = document.getElementById("vStores");
+    for(var i=0;i<ms.options.length;i++){
+      var opt = ms.options[i];
+      opt.selected = !!set[opt.value];
     }
-
-    // consumed/archive buttons context
-    var delBtn = document.querySelector("#couponBackdrop .btn.danger");
-    delBtn.style.display = couponId ? "inline-flex" : "none";
-
-    renderPickedBrandLine();
-    renderCouponTypeUI();
-    renderScopeUI();
-    renderStoreChoices();
-    renderCatChoices();
-    recalcRemaining();
-
-    document.getElementById("couponBackdrop").style.display = "flex";
   }
-  window.openCouponEditor = openCouponEditor;
+  window.selectStoresOfBrand = selectStoresOfBrand;
 
-  function hideCouponModal(){
-    document.getElementById("couponBackdrop").style.display = "none";
-    editingCouponId = null;
-  }
-  window.hideCouponModal = hideCouponModal;
-
-  function closeCouponModal(e){
-    if(e.target === document.getElementById("couponBackdrop")) hideCouponModal();
-  }
-  window.closeCouponModal = closeCouponModal;
-
-  function renderCouponTypeUI(){
-    var t = document.getElementById("cType").value;
-    var isVal = hasValueType(t);
-
-    document.getElementById("amountsBlock").style.display = isVal ? "block" : "none";
-    // code field always shown (even physical), because physical still may have number to paste; user asked only remove hint text near physical
-    document.getElementById("codeField").style.display = "block";
-
-    // if switching to non-value, clear amount fields
-    if(!isVal){
-      document.getElementById("cTotal").value = "";
-      document.getElementById("cUsed").value = "";
-      document.getElementById("cRemaining").value = "";
-    } else {
-      recalcRemaining();
+  function recalcBalance(){
+    var type = document.getElementById("vType").value;
+    if(type==="money"){
+      var total = Number(document.getElementById("vTotal").value || 0);
+      var used = Number(document.getElementById("vUsed").value || 0);
+      document.getElementById("vBalance").value = String(Math.max(0, round2(total - used)));
     }
-
-    renderActive();
-    renderArchive();
+    if(type==="cap"){
+      var ct = Number(document.getElementById("vCapTotal").value || 0);
+      var cu = Number(document.getElementById("vCapUsed").value || 0);
+      document.getElementById("vCapBalance").value = String(Math.max(0, round2(ct - cu)));
+    }
   }
-  window.renderCouponTypeUI = renderCouponTypeUI;
+  window.recalcBalance = recalcBalance;
 
-  function renderScopeUI(){
-    var hasBrand = !!pickedBrandId;
-    document.getElementById("scopeField").style.display = hasBrand ? "block" : "none";
-    document.getElementById("storesField").style.display = hasBrand ? "block" : "none";
+  function renderVoucherFields(){
+    var type = document.getElementById("vType").value;
+    var scope = document.getElementById("vScope").value;
+    var physical = document.getElementById("vPhysical").value === "1";
 
-    if(!hasBrand) return;
+    // Blocks
+    document.getElementById("moneyBlock").style.display = (type==="money") ? "grid" : "none";
+    document.getElementById("capBlock").style.display = (type==="cap") ? "grid" : "none";
+    document.getElementById("simpleDescBlock").style.display = (type==="percent" || type==="bogo" || type==="general") ? "block" : "none";
 
-    var scope = document.getElementById("cScope").value;
-    var lbl = document.getElementById("storesLabel");
-    var note = document.getElementById("storesNote");
-
+    // stores selection visible always, but guidance differs
+    document.getElementById("storesField").style.display = "block";
     if(scope==="all"){
-      lbl.textContent = "חנויות עיקריות (אופציונלי)";
-      note.textContent = "אם בחרת תקף לכל הרשת — אפשר להשאיר בלי חנויות. אם תבחר חנויות כאן, זה רק ‘מועדפים’ לתצוגה.";
-    } else {
-      lbl.textContent = "חנויות תקפות (חובה)";
-      note.textContent = "בחר לפחות חנות אחת.";
+      // selection optional
     }
 
-    // update store summary
-    renderStoreChoices();
-  }
-  window.renderScopeUI = renderScopeUI;
+    // code block hidden for physical cards
+    document.getElementById("codeBlock").style.display = physical ? "none" : "block";
 
-  function renderPickedBrandLine(){
-    var el = document.getElementById("pickedBrandLine");
-    var b = pickedBrandId ? getById(brands,pickedBrandId) : null;
-    if(!b){
-      el.innerHTML = "<b>לא נבחר מותג</b>";
-      document.getElementById("scopeField").style.display = "none";
-      document.getElementById("storesField").style.display = "none";
+    // expiry hint / soon
+    var expiry = document.getElementById("vExpiry").value;
+    var hint = document.getElementById("expiryHint");
+    if(!expiry){
+      hint.textContent = "אם אין תוקף — אפשר להשאיר ריק.";
+    } else {
+      var ms = isoToMs(expiry);
+      var now = isoToMs(todayISO());
+      if(ms < now){
+        hint.textContent = "שימו לב: תוקף כבר פג — השובר יעבור אוטומטית לארכיון.";
+      } else if(ms - now <= SOON_MS){
+        hint.textContent = "קרוב לפקיעה (פחות מ-3 חודשים) — יקפוץ למעלה ויסומן באדום.";
+      } else {
+        hint.textContent = "";
+      }
+    }
+
+    recalcBalance();
+  }
+  window.renderVoucherFields = renderVoucherFields;
+
+  function quickAddBrand(){
+    var name = (prompt("שם מותג חדש:") || "").trim();
+    if(!name) return;
+    // existing active?
+    var ex = brands.find(function(b){ return b.name.toLowerCase() === name.toLowerCase(); });
+    if(ex){
+      if(ex.disabled){
+        if(confirm("המותג קיים אך מושבת. להחזיר לפעיל?")){
+          ex.disabled = false;
+          saveAll();
+          fillBrandSelect();
+          document.getElementById("vBrand").value = ex.id;
+          renderManage();
+          renderActive();
+          renderArchive();
+        }
+      } else {
+        alert("המותג כבר קיים");
+      }
       return;
     }
-    el.innerHTML = "נבחר מותג: <b>" + escapeHtml(b.name) + "</b>";
-    document.getElementById("scopeField").style.display = "block";
-    document.getElementById("storesField").style.display = "block";
+    var b = { id:uid(), name:name, storeIds:[], disabled:false };
+    brands.push(b);
+    saveAll();
+    fillBrandSelect();
+    document.getElementById("vBrand").value = b.id;
+    renderManage();
+    initFilterChips();
   }
+  window.quickAddBrand = quickAddBrand;
 
-  function recalcRemaining(){
-    var t = document.getElementById("cType").value;
-    if(!hasValueType(t)) return;
-    var total = Number(document.getElementById("cTotal").value || 0);
-    var used = Number(document.getElementById("cUsed").value || 0);
-    if(!isFinite(total)) total = 0;
-    if(!isFinite(used)) used = 0;
-    var rem = total - used;
-    if(!isFinite(rem)) rem = 0;
-    rem = Math.max(0, Math.round(rem*100)/100);
-    document.getElementById("cRemaining").value = rem;
-  }
-  window.recalcRemaining = recalcRemaining;
+  function quickAddStore(){
+    var name = (prompt("שם חנות חדשה:") || "").trim();
+    if(!name) return;
+    var ex = stores.find(function(s){ return s.name.toLowerCase() === name.toLowerCase(); });
+    if(ex){
+      if(ex.disabled){
+        if(confirm("החנות קיימת אך מושבתת. להחזיר לפעילה?")){
+          ex.disabled = false;
+          saveAll();
+          fillStoresSelect();
+          renderManage();
+        }
+      } else {
+        alert("החנות כבר קיימת");
+      }
+      return;
+    }
+    var s = { id:uid(), name:name, brandIds:[], catIds:[], disabled:false };
+    stores.push(s);
+    saveAll();
+    fillStoresSelect();
 
-  function getCouponById(id){
-    for(var i=0;i<coupons.length;i++){ if(coupons[i].id===id) return coupons[i]; }
-    return null;
-  }
-
-  function saveCoupon(){
-    // validations:
-    // Must have brand (as per your simplified requirement)
-    if(!pickedBrandId) return alert("בחר מותג או צור מותג חדש לפני שמירה.");
-
-    var type = document.getElementById("cType").value || "כספי";
-    var scope = document.getElementById("cScope").value || "all";
-
-    var physical = (document.getElementById("cPhysical").value === "yes");
-    var code = document.getElementById("cCode").value || "";
-    var notes = document.getElementById("cNotes").value || "";
-    var expiry = document.getElementById("cExpiry").value || "";
-
-    var catIds = pickedCatIds.slice();
-
-    var storeIds = [];
-    var highlightIds = [];
-
-    if(scope==="some"){
-      storeIds = pickedStoreIds.slice();
-      if(!storeIds.length) return alert("בחר לפחות חנות אחת (כי בחרת 'רק חנויות מסוימות').");
-      highlightIds = [];
-    } else {
-      // all network: store selection is optional but saved as highlights
-      highlightIds = pickedHighlightStoreIds.slice();
-      storeIds = [];
+    // select it in voucher
+    var ms = document.getElementById("vStores");
+    for(var i=0;i<ms.options.length;i++){
+      if(ms.options[i].value === s.id) ms.options[i].selected = true;
     }
 
-    var total = null, used = null;
-    if(hasValueType(type)){
-      total = Number(document.getElementById("cTotal").value || 0);
-      used = Number(document.getElementById("cUsed").value || 0);
-      if(!isFinite(total)) total = 0;
-      if(!isFinite(used)) used = 0;
-      if(used<0) used=0;
-      if(total<0) total=0;
+    renderManage();
+    initFilterChips();
+  }
+  window.quickAddStore = quickAddStore;
+
+  function pasteInto(id){
+    document.getElementById("pasteWarn").style.display = "none";
+    try{
+      if(!navigator.clipboard || !navigator.clipboard.readText){
+        document.getElementById("pasteWarn").style.display="block"; return;
+      }
+      navigator.clipboard.readText().then(function(txt){
+        if(txt) document.getElementById(id).value = txt;
+        recalcBalance();
+      }).catch(function(){
+        document.getElementById("pasteWarn").style.display="block";
+      });
+    } catch(e){
+      document.getElementById("pasteWarn").style.display="block";
     }
+  }
+  window.pasteInto = pasteInto;
+
+  function validateVoucherDraft(draft){
+    // חובה: מותג או חנות אחת לפחות
+    var hasBrand = !!draft.brandId;
+    var hasStore = (draft.storeIds && draft.storeIds.length>0);
+    if(!hasBrand && !hasStore){
+      return "חובה לבחור מותג או לפחות חנות אחת.";
+    }
+
+    // type validations
+    if(draft.type==="money"){
+      if(!(draft.total>0)) return "בשובר כספי חובה למלא סכום שובר גדול מ-0.";
+      if(draft.used < 0) return "נוצל לא יכול להיות שלילי.";
+      if(draft.used > draft.total) return "נוצל לא יכול להיות גדול מסכום השובר.";
+    }
+    if(draft.type==="cap"){
+      if(!(draft.capTotal>0)) return "בשובר תקרה חובה למלא תקרה גדולה מ-0.";
+      if(draft.capUsed < 0) return "נוצל לא יכול להיות שלילי.";
+      if(draft.capUsed > draft.capTotal) return "נוצל לא יכול להיות גדול מהתקרה.";
+      if(!draft.capDesc.trim()) return "בשובר תקרה מומלץ למלא תיאור (לדוגמה: 20% עד 200₪).";
+    }
+
+    return "";
+  }
+
+  function saveVoucher(){
+    var draft = {
+      type: document.getElementById("vType").value,
+      physical: document.getElementById("vPhysical").value === "1",
+      brandId: document.getElementById("vBrand").value,
+      scope: document.getElementById("vScope").value,
+      storeIds: getSelectedValues(document.getElementById("vStores")),
+      total: Number(document.getElementById("vTotal").value || 0),
+      used: Number(document.getElementById("vUsed").value || 0),
+
+      capDesc: String(document.getElementById("vCapDesc").value || ""),
+      capTotal: Number(document.getElementById("vCapTotal").value || 0),
+      capUsed: Number(document.getElementById("vCapUsed").value || 0),
+
+      desc: String(document.getElementById("vDesc").value || ""),
+      expiry: String(document.getElementById("vExpiry").value || ""),
+      code: String(document.getElementById("vCode").value || ""),
+      notes: String(document.getElementById("vNotes").value || "")
+    };
+
+    // If scope is all and no stores selected, allow empty (and show brand main stores later)
+    // If scope is stores, allow empty too (user may not have list yet) but it will show "חנויות: —" if none.
+    // still ok.
+
+    var err = validateVoucherDraft(draft);
+    if(err){
+      alert(err);
+      return;
+    }
+
+    var brand = findBrandById(draft.brandId);
+    var brandNameAtCreation = brand ? brand.name : "";
+    var storeNamesAtCreation = draft.storeIds.map(function(id){
+      var s = findStoreById(id);
+      return s ? s.name : "";
+    }).filter(Boolean);
 
     var now = Date.now();
 
-    if(editingCouponId){
-      var c = getCouponById(editingCouponId);
-      if(!c) return alert("שובר לא נמצא.");
-      c.type = type;
-      c.brandId = pickedBrandId;
-      c.scope = scope;
-      c.storeIds = storeIds;
-      c.highlightStoreIds = highlightIds;
-      c.catIds = catIds;
-      c.physical = physical;
-      c.code = code;
-      c.notes = notes;
-      c.expiryISO = expiry;
-      c.total = total;
-      c.used = used;
-      c.updatedAt = now;
+    if(voucherEditingId){
+      vouchers = vouchers.map(function(v){
+        if(v.id !== voucherEditingId) return v;
 
-      // if edited from archive and becomes available again: allow by explicit action (restore)
-      // we keep archived unless user restores from archive
-      // but if user adjusts used/expiry to make it available, we keep it archived until they restore (prevents surprises)
-      // (User can restore via "החזר לפעיל" button in archive open screen — implemented below)
-      ensureArchiveState(c);
+        v.type = draft.type;
+        v.physical = draft.physical;
+
+        v.brandId = draft.brandId;
+        v.brandNameAtCreation = v.brandNameAtCreation || brandNameAtCreation; // preserve old name snapshot if existed
+        if(brandNameAtCreation) v.brandNameAtCreation = brandNameAtCreation;
+
+        v.scope = draft.scope;
+        v.storeIds = draft.storeIds;
+        v.storeNamesAtCreation = storeNamesAtCreation.length ? storeNamesAtCreation : v.storeNamesAtCreation;
+
+        v.total = draft.total;
+        v.used = draft.used;
+
+        v.capDesc = draft.capDesc;
+        v.capTotal = draft.capTotal;
+        v.capUsed = draft.capUsed;
+
+        v.desc = draft.desc;
+        v.expiry = draft.expiry;
+        v.code = draft.code;
+        v.notes = draft.notes;
+
+        v.updatedAt = now;
+        v.updatedBy = DEVICE_NAME;
+
+        // auto archive check
+        return v;
+      });
     } else {
-      var c2 = {
-        id: uid("c"),
+      var vNew = {
+        id: uid(),
         createdAt: now,
         updatedAt: now,
-        type: type,
-        brandId: pickedBrandId,
-        scope: scope,
-        storeIds: storeIds,
-        highlightStoreIds: highlightIds,
-        catIds: catIds,
-        physical: physical,
-        code: code,
-        notes: notes,
-        expiryISO: expiry,
-        total: total,
-        used: used,
-        consumedManual: false,
+        updatedBy: DEVICE_NAME,
         archived: false,
-        archivedAt: 0,
-        archivedReason: ""
+
+        type: draft.type,
+        physical: draft.physical,
+
+        brandId: draft.brandId,
+        brandNameAtCreation: brandNameAtCreation,
+
+        scope: draft.scope,
+        storeIds: draft.storeIds,
+        storeNamesAtCreation: storeNamesAtCreation,
+
+        total: draft.total,
+        used: draft.used,
+
+        capDesc: draft.capDesc,
+        capTotal: draft.capTotal,
+        capUsed: draft.capUsed,
+
+        desc: draft.desc,
+        expiry: draft.expiry,
+        code: draft.code,
+        notes: draft.notes
       };
-      coupons.push(ensureArchiveState(c2));
+      vouchers.push(vNew);
     }
 
-    persistAll();
-    normalizeCoupons();
-    hideCouponModal();
+    autoArchiveByRules();
+    saveAll();
     renderAll();
+    hideVoucherModal();
   }
-  window.saveCoupon = saveCoupon;
+  window.saveVoucher = saveVoucher;
 
-  function markCouponConsumed(){
-    if(!editingCouponId){
-      alert("שמור את השובר קודם, ואז תוכל להעביר לארכיון.");
-      return;
-    }
-    var c = getCouponById(editingCouponId);
-    if(!c) return;
-
-    if(hasValueType(c.type)){
-      // set used = total
-      c.used = Number(c.total||0);
-    } else {
-      c.consumedManual = true;
-    }
-    c.updatedAt = Date.now();
-    ensureArchiveState(c);
-
-    persistAll();
-    normalizeCoupons();
-    hideCouponModal();
+  function deleteVoucher(){
+    if(!voucherEditingId) return;
+    if(!confirm("למחוק את השובר לצמיתות?")) return;
+    vouchers = vouchers.filter(function(v){ return v.id !== voucherEditingId; });
+    saveAll();
     renderAll();
+    hideVoucherModal();
   }
-  window.markCouponConsumed = markCouponConsumed;
+  window.deleteVoucher = deleteVoucher;
 
-  function deleteCoupon(){
-    if(!editingCouponId) return;
-    if(!confirm("למחוק שובר לצמיתות מהמכשיר? (לא מומלץ בדרך כלל)")) return;
-
-    coupons = coupons.filter(function(x){ return x.id !== editingCouponId; });
-    persistAll();
-    normalizeCoupons();
-    hideCouponModal();
-    renderAll();
-  }
-  window.deleteCoupon = deleteCoupon;
-
-  // ===== Brand picker + inline create =====
-  var pickerMode = ""; // "brandPick" | "brandOpen" | "storeOpen" | "catOpen"
-  var pickerMulti = false;
-  var pickerSelected = []; // ids
-  var pickerContext = {};  // for manage details etc.
-
-  function openPickBrand(){
-    pickerMode = "brandPick";
-    pickerMulti = false;
-    pickerSelected = pickedBrandId ? [pickedBrandId] : [];
-    pickerContext = {};
-    showPicker("בחר מותג", listActiveEntities(brands), false, true);
-  }
-  window.openPickBrand = openPickBrand;
-
-  function createBrandInline(){
-    var name = normName(document.getElementById("newBrandInline").value);
-    if(!name) return;
-
-    // check exists
-    var existing = brands.find(function(b){ return String(b.name).toLowerCase() === name.toLowerCase(); });
-    if(existing){
-      if(existing.disabled){
-        if(confirm('המותג "'+existing.name+'" קיים אך מושבת. להחזיר לפעיל?')){
-          existing.disabled = false;
-          persistAll();
-          pickedBrandId = existing.id;
-          renderPickedBrandLine();
-          renderScopeUI();
-          renderStoreChoices();
-          renderCatChoices();
-          document.getElementById("newBrandInline").value = "";
-          alert("המותג הוחזר לפעיל ✅");
-          return;
-        }
+  function moveVoucherToArchive(){
+    if(!voucherEditingId) return;
+    vouchers.forEach(function(v){
+      if(v.id===voucherEditingId){
+        v.archived = true;
+        v.updatedAt = Date.now();
+        v.updatedBy = DEVICE_NAME;
       }
-      alert("המותג כבר קיים.");
-      return;
-    }
-
-    var b = { id: uid("b"), name: name, disabled:false };
-    brands.push(b);
-    persistAll();
-
-    pickedBrandId = b.id;
-    document.getElementById("newBrandInline").value = "";
-
-    renderPickedBrandLine();
-    renderScopeUI();
-    renderStoreChoices();
-    renderCatChoices();
-    renderAll();
-  }
-  window.createBrandInline = createBrandInline;
-
-  function createStoreInline(){
-    var name = normName(document.getElementById("newStoreInline").value);
-    if(!name) return;
-
-    var existing = stores.find(function(s){ return String(s.name).toLowerCase() === name.toLowerCase(); });
-    if(existing){
-      if(existing.disabled){
-        if(confirm('החנות "'+existing.name+'" קיימת אך מושבתת. להחזיר לפעיל?')){
-          existing.disabled = false;
-          persistAll();
-          document.getElementById("newStoreInline").value = "";
-          renderStoreChoices();
-          alert("החנות הוחזרה לפעיל ✅");
-          return;
-        }
-      }
-      alert("החנות כבר קיימת.");
-      return;
-    }
-
-    var s = { id: uid("s"), name: name, disabled:false };
-    stores.push(s);
-    persistAll();
-    document.getElementById("newStoreInline").value = "";
-    renderStoreChoices();
-    renderAll();
-  }
-  window.createStoreInline = createStoreInline;
-
-  function createCategoryInline(){
-    var name = normName(document.getElementById("newCatInline").value);
-    if(!name) return;
-
-    var existing = categories.find(function(k){ return String(k.name).toLowerCase() === name.toLowerCase(); });
-    if(existing){
-      if(existing.disabled){
-        if(confirm('הקטגוריה "'+existing.name+'" קיימת אך מושבתת. להחזיר לפעיל?')){
-          existing.disabled = false;
-          persistAll();
-          document.getElementById("newCatInline").value = "";
-          renderCatChoices();
-          alert("הקטגוריה הוחזרה לפעיל ✅");
-          return;
-        }
-      }
-      alert("הקטגוריה כבר קיימת.");
-      return;
-    }
-
-    var k = { id: uid("k"), name:name, disabled:false };
-    categories.push(k);
-    persistAll();
-    document.getElementById("newCatInline").value = "";
-    renderCatChoices();
-    renderAll();
-  }
-  window.createCategoryInline = createCategoryInline;
-
-  function renderStoreChoices(){
-    var scope = document.getElementById("cScope").value || "all";
-    var list = listActiveEntities(stores);
-
-    var host = document.getElementById("storesChoices");
-    host.innerHTML = "";
-
-    var selected = (scope==="some") ? pickedStoreIds : pickedHighlightStoreIds;
-
-    list.forEach(function(s){
-      var row = document.createElement("label");
-      row.className = "choiceRow " + (selected.indexOf(s.id)>=0 ? "active" : "");
-      row.innerHTML = '<input type="checkbox" '+(selected.indexOf(s.id)>=0?'checked':'')+' />' +
-                      '<div style="font-weight:900;">'+escapeHtml(s.name)+'</div>';
-      var cb = row.querySelector("input");
-      cb.onchange = function(){
-        if(scope==="some"){
-          if(cb.checked) pickedStoreIds = uniq(pickedStoreIds.concat([s.id]));
-          else pickedStoreIds = removeFromArray(pickedStoreIds, s.id);
-        } else {
-          if(cb.checked) pickedHighlightStoreIds = uniq(pickedHighlightStoreIds.concat([s.id]));
-          else pickedHighlightStoreIds = removeFromArray(pickedHighlightStoreIds, s.id);
-        }
-        renderStoreChoices();
-      };
-      host.appendChild(row);
     });
-
-    var summary = document.getElementById("storesSummary");
-    var names = selected.map(function(id){
-      var x = getById(stores,id); return x ? x.name : "";
-    }).filter(Boolean);
-
-    if(!names.length){
-      summary.textContent = (scope==="some") ? "בחר חנויות" : "בחר חנויות עיקריות (אופציונלי)";
-    } else {
-      summary.textContent = "נבחרו: " + names.slice(0,2).join(", ") + (names.length>2 ? " +" + (names.length-2) : "");
-    }
+    saveAll();
+    renderAll();
+    hideVoucherModal();
   }
+  window.moveVoucherToArchive = moveVoucherToArchive;
 
-  function renderCatChoices(){
-    var list = listActiveEntities(categories);
-    var host = document.getElementById("catsChoices");
-    host.innerHTML = "";
-
-    list.forEach(function(k){
-      var row = document.createElement("label");
-      row.className = "choiceRow " + (pickedCatIds.indexOf(k.id)>=0 ? "active":"");
-      row.innerHTML = '<input type="checkbox" '+(pickedCatIds.indexOf(k.id)>=0?'checked':'')+' />' +
-                      '<div style="font-weight:900;">'+escapeHtml(k.name)+'</div>';
-      var cb = row.querySelector("input");
-      cb.onchange = function(){
-        if(cb.checked) pickedCatIds = uniq(pickedCatIds.concat([k.id]));
-        else pickedCatIds = removeFromArray(pickedCatIds, k.id);
-        renderCatChoices();
-      };
-      host.appendChild(row);
-    });
-
-    var sum = document.getElementById("catsSummary");
-    var names = pickedCatIds.map(function(id){
-      var x = getById(categories,id); return x ? x.name : "";
-    }).filter(Boolean);
-    sum.textContent = names.length ? ("נבחרו: " + names.slice(0,2).join(", ") + (names.length>2 ? " +" + (names.length-2) : "")) : "בחר קטגוריות";
-  }
-
-  // ===== Picker modal (generic) =====
-  function showPicker(title, items, multi, allowCreate){
-    pickerMulti = !!multi;
-
-    document.getElementById("pickerTitle").textContent = title;
-    document.getElementById("pickerSearch").value = "";
-    document.getElementById("pickerBackdrop").style.display = "flex";
-
-    pickerContext.items = items.slice(); // cache
-    pickerContext.allowCreate = !!allowCreate;
-
-    renderPickerList();
-    renderPickerBottom();
-  }
-
-  function hidePicker(){
-    document.getElementById("pickerBackdrop").style.display = "none";
-    pickerMode = "";
-    pickerSelected = [];
-    pickerContext = {};
-  }
-  window.hidePicker = hidePicker;
-
-  function closePickerModal(e){
-    if(e.target === document.getElementById("pickerBackdrop")) hidePicker();
-  }
-  window.closePickerModal = closePickerModal;
-
-  function renderPickerList(){
-    var host = document.getElementById("pickerList");
-    host.innerHTML = "";
-
-    var q = (document.getElementById("pickerSearch").value || "").trim().toLowerCase();
-    var items = (pickerContext.items || []).filter(function(it){
-      if(!q) return true;
-      return String(it.name||"").toLowerCase().indexOf(q)>=0;
-    });
-
-    if(!items.length){
-      host.innerHTML = '<div class="note">אין תוצאות.</div>';
-      return;
-    }
-
-    items.forEach(function(it){
-      var isOn = pickerSelected.indexOf(it.id)>=0;
-      var row = document.createElement("label");
-      row.className = "choiceRow " + (isOn ? "active":"");
-      row.innerHTML = '<input type="'+(pickerMulti?'checkbox':'radio')+'" name="pickerOne" '+(isOn?'checked':'')+' />' +
-                      '<div style="font-weight:900;">'+escapeHtml(it.name)+'</div>';
-      var inp = row.querySelector("input");
-      inp.onchange = function(){
-        if(pickerMulti){
-          if(inp.checked) pickerSelected = uniq(pickerSelected.concat([it.id]));
-          else pickerSelected = removeFromArray(pickerSelected, it.id);
-        } else {
-          pickerSelected = [it.id];
-        }
-        renderPickerList();
-      };
-      host.appendChild(row);
-    });
-  }
-
-  function renderPickerBottom(){
-    var bottom = document.getElementById("pickerBottom");
-    bottom.innerHTML = "";
-
-    if(pickerMode==="brandPick"){
-      bottom.innerHTML = '<div class="note">בחר מותג קיים. אם חסר — סגור וחזור ליצירת שובר כדי ליצור מותג חדש.</div>';
-    } else {
-      bottom.innerHTML = '<div class="note">ניהול קשרים מתבצע במסכי “פתח”.</div>';
-    }
-  }
-
-  function pickerConfirm(){
-    if(pickerMode==="brandPick"){
-      if(!pickerSelected.length) return alert("בחר מותג.");
-      pickedBrandId = pickerSelected[0];
-      renderPickedBrandLine();
-      renderScopeUI();
-      renderStoreChoices();
-      renderCatChoices();
-      hidePicker();
-      return;
-    }
-
-    // Other picker modes used for manage details (handled there)
-    hidePicker();
-  }
-  window.pickerConfirm = pickerConfirm;
-
-  // ===== Manage tab (lists + open details) =====
-  function clearManageSearch(){
-    document.getElementById("manageSearch").value = "";
-    renderManage();
-  }
-  window.clearManageSearch = clearManageSearch;
-
-  function addBrandFromManage(){
-    var name = normName(document.getElementById("newBrandName").value);
-    if(!name) return;
-
-    var existing = brands.find(function(b){ return String(b.name).toLowerCase()===name.toLowerCase(); });
-    if(existing){
-      if(existing.disabled){
-        if(confirm('המותג "'+existing.name+'" קיים אך מושבת. להחזיר לפעיל?')){
-          existing.disabled=false;
-          persistAll();
-          renderManage();
-          document.getElementById("newBrandName").value="";
-          alert("המותג הוחזר לפעיל ✅");
+  function restoreVoucherFromArchive(){
+    if(!voucherEditingId) return;
+    vouchers.forEach(function(v){
+      if(v.id===voucherEditingId){
+        if(isExpired(v)){
+          alert("תוקף כבר פג. לא ניתן להחזיר לפעיל.");
           return;
         }
+        v.archived = false;
+        v.updatedAt = Date.now();
+        v.updatedBy = DEVICE_NAME;
       }
-      alert("המותג כבר קיים.");
-      return;
-    }
-
-    brands.push({id:uid("b"), name:name, disabled:false});
-    persistAll();
-    document.getElementById("newBrandName").value="";
-    renderManage();
+    });
+    saveAll();
     renderAll();
+    hideVoucherModal();
   }
-  window.addBrandFromManage = addBrandFromManage;
+  window.restoreVoucherFromArchive = restoreVoucherFromArchive;
 
-  function addStoreFromManage(){
-    var name = normName(document.getElementById("newStoreName").value);
-    if(!name) return;
-
-    var existing = stores.find(function(s){ return String(s.name).toLowerCase()===name.toLowerCase(); });
-    if(existing){
-      if(existing.disabled){
-        if(confirm('החנות "'+existing.name+'" קיימת אך מושבתת. להחזיר לפעיל?')){
-          existing.disabled=false;
-          persistAll();
-          renderManage();
-          document.getElementById("newStoreName").value="";
-          alert("החנות הוחזרה לפעיל ✅");
-          return;
-        }
-      }
-      alert("החנות כבר קיימת.");
-      return;
-    }
-
-    stores.push({id:uid("s"), name:name, disabled:false});
-    persistAll();
-    document.getElementById("newStoreName").value="";
-    renderManage();
-    renderAll();
-  }
-  window.addStoreFromManage = addStoreFromManage;
-
-  function addCategoryFromManage(){
-    var name = normName(document.getElementById("newCatName").value);
-    if(!name) return;
-
-    var existing = categories.find(function(k){ return String(k.name).toLowerCase()===name.toLowerCase(); });
-    if(existing){
-      if(existing.disabled){
-        if(confirm('הקטגוריה "'+existing.name+'" קיימת אך מושבתת. להחזיר לפעיל?')){
-          existing.disabled=false;
-          persistAll();
-          renderManage();
-          document.getElementById("newCatName").value="";
-          alert("הקטגוריה הוחזרה לפעיל ✅");
-          return;
-        }
-      }
-      alert("הקטגוריה כבר קיימת.");
-      return;
-    }
-
-    categories.push({id:uid("k"), name:name, disabled:false});
-    persistAll();
-    document.getElementById("newCatName").value="";
-    renderManage();
-    renderAll();
-  }
-  window.addCategoryFromManage = addCategoryFromManage;
-
+  /* ===== Manage: brands/stores/categories lists ===== */
   function renderManage(){
-    var q = (document.getElementById("manageSearch").value || "").trim().toLowerCase();
-
     // Brands list
-    var bl = document.getElementById("brandsList");
-    bl.innerHTML = "";
+    var hostB = document.getElementById("brandsList");
+    hostB.innerHTML = "";
     brands.slice().sort(function(a,b){ return a.name.localeCompare(b.name,"he"); }).forEach(function(b){
-      if(q && b.name.toLowerCase().indexOf(q)<0) return;
-      bl.appendChild(renderManageRow("brand", b));
+      var row = document.createElement("div");
+      row.className = "kv";
+      var label = b.name + (b.disabled ? " (מושבת)" : "");
+      row.innerHTML =
+        "<b>"+escapeHtml(label)+"</b>" +
+        '<span style="display:flex; gap:8px; align-items:center; justify-content:flex-start;">' +
+          '<button class="iconbtn" type="button" title="פתח">⮕</button>' +
+          '<button class="iconbtn" type="button" title="ערוך שם">✏️</button>' +
+          (b.disabled
+            ? '<button class="iconbtn" type="button" title="החזר לפעיל">✅</button>'
+            : '<button class="iconbtn" type="button" title="השבת">⛔</button>') +
+        "</span>";
+
+      var btns = row.querySelectorAll("button");
+      btns[0].onclick = function(){ openBrandModal(b.id); };
+      btns[1].onclick = function(){ quickRenameBrand(b.id); };
+      btns[2].onclick = function(){
+        if(b.disabled){
+          if(confirm("להחזיר את המותג לפעיל?")){
+            b.disabled = false;
+            saveAll();
+            renderAll();
+          }
+        } else {
+          if(confirm("להשבית את המותג? (לא נמחק היסטוריה)")){
+            b.disabled = true;
+            saveAll();
+            renderAll();
+          }
+        }
+      };
+
+      hostB.appendChild(row);
     });
 
     // Stores list
-    var sl = document.getElementById("storesList");
-    sl.innerHTML = "";
+    var hostS = document.getElementById("storesList");
+    hostS.innerHTML = "";
     stores.slice().sort(function(a,b){ return a.name.localeCompare(b.name,"he"); }).forEach(function(s){
-      if(q && s.name.toLowerCase().indexOf(q)<0) return;
-      sl.appendChild(renderManageRow("store", s));
+      var row2 = document.createElement("div");
+      row2.className = "kv";
+      var label2 = s.name + (s.disabled ? " (מושבת)" : "");
+      row2.innerHTML =
+        "<b>"+escapeHtml(label2)+"</b>" +
+        '<span style="display:flex; gap:8px; align-items:center; justify-content:flex-start;">' +
+          '<button class="iconbtn" type="button" title="פתח">⮕</button>' +
+          '<button class="iconbtn" type="button" title="ערוך שם">✏️</button>' +
+          (s.disabled
+            ? '<button class="iconbtn" type="button" title="החזר לפעיל">✅</button>'
+            : '<button class="iconbtn" type="button" title="השבת">⛔</button>') +
+        "</span>";
+
+      var btns2 = row2.querySelectorAll("button");
+      btns2[0].onclick = function(){ openStoreModal(s.id); };
+      btns2[1].onclick = function(){ quickRenameStore(s.id); };
+      btns2[2].onclick = function(){
+        if(s.disabled){
+          if(confirm("להחזיר את החנות לפעילה?")){
+            s.disabled = false;
+            saveAll();
+            renderAll();
+          }
+        } else {
+          if(confirm("להשבית את החנות? (לא נמחק היסטוריה)")){
+            s.disabled = true;
+            saveAll();
+            renderAll();
+          }
+        }
+      };
+
+      hostS.appendChild(row2);
     });
 
     // Categories list
-    var cl = document.getElementById("catsList");
-    cl.innerHTML = "";
-    categories.slice().sort(function(a,b){ return a.name.localeCompare(b.name,"he"); }).forEach(function(k){
-      if(q && k.name.toLowerCase().indexOf(q)<0) return;
-      cl.appendChild(renderManageRow("cat", k));
+    var hostC = document.getElementById("catsList");
+    hostC.innerHTML = "";
+    categories.slice().sort(function(a,b){ return a.name.localeCompare(b.name,"he"); }).forEach(function(c){
+      var row3 = document.createElement("div");
+      row3.className = "kv";
+      var label3 = c.name + (c.disabled ? " (מושבת)" : "");
+      row3.innerHTML =
+        "<b>"+escapeHtml(label3)+"</b>" +
+        '<span style="display:flex; gap:8px; align-items:center; justify-content:flex-start;">' +
+          '<button class="iconbtn" type="button" title="ערוך שם">✏️</button>' +
+          (c.disabled
+            ? '<button class="iconbtn" type="button" title="החזר לפעיל">✅</button>'
+            : '<button class="iconbtn" type="button" title="השבת">⛔</button>') +
+          '<button class="iconbtn" type="button" title="מחק">🗑️</button>' +
+        "</span>";
+
+      var btns3 = row3.querySelectorAll("button");
+      btns3[0].onclick = function(){
+        var nn = (prompt("שם חדש לקטגוריה:", c.name) || "").trim();
+        if(!nn) return;
+        c.name = nn;
+        saveAll();
+        renderAll();
+      };
+      btns3[1].onclick = function(){
+        if(c.disabled){
+          if(confirm("להחזיר קטגוריה לפעילה?")){
+            c.disabled = false;
+            saveAll();
+            renderAll();
+          }
+        } else {
+          if(confirm("להשבית קטגוריה?")){
+            c.disabled = true;
+            saveAll();
+            renderAll();
+          }
+        }
+      };
+      btns3[2].onclick = function(){
+        if(!confirm("למחוק קטגוריה? (לא מוחק היסטוריה)")) return;
+        // remove category from store links
+        stores.forEach(function(s){
+          s.catIds = (s.catIds||[]).filter(function(x){ return x!==c.id; });
+        });
+        categories = categories.filter(function(x){ return x.id !== c.id; });
+        saveAll();
+        renderAll();
+      };
+
+      hostC.appendChild(row3);
     });
   }
 
-  function renderManageRow(kind, item){
-    var li = document.createElement("li");
+  function addBrand(){
+    var name = (document.getElementById("newBrandInput").value || "").trim();
+    if(!name) return;
+    document.getElementById("newBrandInput").value = "";
 
-    var left = document.createElement("div");
-    left.style.display="flex";
-    left.style.alignItems="center";
-    left.style.gap="8px";
-    left.style.minWidth="0";
-    left.style.flex="1";
-
-    var name = document.createElement("span");
-    name.textContent = item.name;
-
-    left.appendChild(name);
-
-    if(item.disabled){
-      var tag = document.createElement("span");
-      tag.className="disabledTag";
-      tag.textContent="מושבת";
-      left.appendChild(tag);
-    }
-
-    var grp = document.createElement("div");
-    grp.className = "btnGroup";
-
-    // Open details (blue arrow)
-    var open = document.createElement("button");
-    open.className = "iconbtn openSmall";
-    open.type="button";
-    open.title="פתח";
-    open.textContent = "⤴";
-    open.onclick = function(){
-      if(kind==="brand") openBrandDetails(item.id);
-      else if(kind==="store") openStoreDetails(item.id);
-      else openCatDetails(item.id);
-    };
-
-    // Edit name
-    var edit = document.createElement("button");
-    edit.className = "iconbtn";
-    edit.type="button";
-    edit.title="שנה שם";
-    edit.textContent = "✏️";
-    edit.onclick = function(){
-      var next = (prompt("שם חדש:", item.name) || "").trim();
-      if(!next) return;
-      var exists = null;
-      if(kind==="brand") exists = brands.find(function(x){ return x.id!==item.id && x.name.toLowerCase()===next.toLowerCase(); });
-      if(kind==="store") exists = stores.find(function(x){ return x.id!==item.id && x.name.toLowerCase()===next.toLowerCase(); });
-      if(kind==="cat") exists = categories.find(function(x){ return x.id!==item.id && x.name.toLowerCase()===next.toLowerCase(); });
-      if(exists) return alert("שם כבר קיים.");
-
-      item.name = next;
-      persistAll();
-      renderAll();
-    };
-
-    // Enable/Disable
-    var en = document.createElement("button");
-    en.className = "iconbtn enableBtn";
-    en.type="button";
-    en.title = item.disabled ? "החזר לפעיל" : "השבת";
-    en.textContent = item.disabled ? "✅" : "⛔";
-    en.onclick = function(){
-      if(item.disabled){
-        item.disabled = false;
+    var ex = brands.find(function(b){ return b.name.toLowerCase() === name.toLowerCase(); });
+    if(ex){
+      if(ex.disabled){
+        if(confirm("המותג קיים אך מושבת. להחזיר לפעיל?")){
+          ex.disabled = false;
+          saveAll();
+          renderAll();
+        }
       } else {
-        if(!confirm("להשבית? (לא מוחק היסטוריה)")) return;
-        item.disabled = true;
+        alert("המותג כבר קיים");
       }
-      persistAll();
-      renderAll();
-    };
-
-    grp.appendChild(open);
-    grp.appendChild(edit);
-    grp.appendChild(en);
-
-    li.appendChild(left);
-    li.appendChild(grp);
-
-    return li;
-  }
-
-  // ===== Manage Details Modals (reuse picker modal UI) =====
-  var detailsKind = ""; // brand|store|cat
-  var detailsId = "";
-
-  function openBrandDetails(brandId){
-    var b = getById(brands,brandId);
-    if(!b) return;
-
-    detailsKind="brand"; detailsId=brandId;
-
-    var storeIds = ensureLinksArray(links.brandStores, brandId).slice();
-    var catIds = ensureLinksArray(links.brandCats, brandId).slice();
-
-    showDetailsModal(
-      "מותג: " + b.name,
-      [
-        { title:"חנויות משויכות", list:listActiveEntities(stores), selected:storeIds, onSave:function(sel){ setBrandStores(brandId, sel); } },
-        { title:"קטגוריות למותג", list:listActiveEntities(categories), selected:catIds, onSave:function(sel){ setBrandCats(brandId, sel); } }
-      ],
-      function(){
-        var name = (prompt("שם חדש למותג:", b.name) || "").trim();
-        if(!name) return;
-        if(brands.some(function(x){ return x.id!==b.id && x.name.toLowerCase()===name.toLowerCase(); })) return alert("שם כבר קיים.");
-        b.name=name; persistAll(); renderAll();
-        // reopen
-        openBrandDetails(brandId);
-      }
-    );
-  }
-
-  function openStoreDetails(storeId){
-    var s = getById(stores,storeId);
-    if(!s) return;
-
-    detailsKind="store"; detailsId=storeId;
-
-    var brandIds = ensureLinksArray(links.storeBrands, storeId).slice();
-    var catIds = ensureLinksArray(links.storeCats, storeId).slice();
-
-    showDetailsModal(
-      "חנות: " + s.name,
-      [
-        { title:"מותגים של החנות", list:listActiveEntities(brands), selected:brandIds, onSave:function(sel){ setStoreBrands(storeId, sel); } },
-        { title:"קטגוריות לחנות", list:listActiveEntities(categories), selected:catIds, onSave:function(sel){ setStoreCats(storeId, sel); } }
-      ],
-      function(){
-        var name = (prompt("שם חדש לחנות:", s.name) || "").trim();
-        if(!name) return;
-        if(stores.some(function(x){ return x.id!==s.id && x.name.toLowerCase()===name.toLowerCase(); })) return alert("שם כבר קיים.");
-        s.name=name; persistAll(); renderAll();
-        openStoreDetails(storeId);
-      }
-    );
-  }
-
-  function openCatDetails(catId){
-    var k = getById(categories,catId);
-    if(!k) return;
-
-    detailsKind="cat"; detailsId=catId;
-
-    var brandIds = ensureLinksArray(links.catBrands, catId).slice();
-    var storeIds = ensureLinksArray(links.catStores, catId).slice();
-
-    showDetailsModal(
-      "קטגוריה: " + k.name,
-      [
-        { title:"מותגים בקטגוריה", list:listActiveEntities(brands), selected:brandIds, onSave:function(sel){ setCatBrands(catId, sel); } },
-        { title:"חנויות בקטגוריה", list:listActiveEntities(stores), selected:storeIds, onSave:function(sel){ setCatStores(catId, sel); } }
-      ],
-      function(){
-        var name = (prompt("שם חדש לקטגוריה:", k.name) || "").trim();
-        if(!name) return;
-        if(categories.some(function(x){ return x.id!==k.id && x.name.toLowerCase()===name.toLowerCase(); })) return alert("שם כבר קיים.");
-        k.name=name; persistAll(); renderAll();
-        openCatDetails(catId);
-      }
-    );
-  }
-
-  function showDetailsModal(title, sections, onRename){
-    // Use picker modal as details UI
-    document.getElementById("pickerBackdrop").style.display = "flex";
-    document.getElementById("pickerTitle").textContent = title;
-
-    // lock picker search for details
-    document.getElementById("pickerSearch").value = "";
-    document.getElementById("pickerSearch").placeholder = "טיפ: סמן/בטל סימון כדי לשייך";
-
-    var host = document.getElementById("pickerList");
-    host.innerHTML = "";
-
-    sections.forEach(function(sec, idx){
-      var h = document.createElement("div");
-      h.className = "badge";
-      h.style.marginTop = "8px";
-      h.textContent = sec.title;
-      host.appendChild(h);
-
-      sec.list.forEach(function(it){
-        var isOn = sec.selected.indexOf(it.id)>=0;
-        var row = document.createElement("label");
-        row.className = "choiceRow " + (isOn ? "active":"");
-        row.innerHTML = '<input type="checkbox" '+(isOn?'checked':'')+' />' +
-                        '<div style="font-weight:900;">'+escapeHtml(it.name)+'</div>';
-        var cb = row.querySelector("input");
-        cb.onchange = function(){
-          if(cb.checked) sec.selected = uniq(sec.selected.concat([it.id]));
-          else sec.selected = removeFromArray(sec.selected, it.id);
-          row.classList.toggle("active", cb.checked);
-        };
-        host.appendChild(row);
-      });
-
-      // small separator
-      if(idx < sections.length-1){
-        var sep = document.createElement("div");
-        sep.className = "hr";
-        host.appendChild(sep);
-      }
-    });
-
-    var bottom = document.getElementById("pickerBottom");
-    bottom.innerHTML = "";
-
-    var row = document.createElement("div");
-    row.className = "inline";
-
-    var saveBtn = document.createElement("button");
-    saveBtn.className = "btn primary fit";
-    saveBtn.type="button";
-    saveBtn.textContent = "שמירה";
-    saveBtn.onclick = function(){
-      // commit all section changes
-      sections.forEach(function(sec){
-        sec.onSave(sec.selected.slice());
-      });
-      persistAll();
-      renderAll();
-      alert("נשמר ✅");
-    };
-
-    var renameBtn = document.createElement("button");
-    renameBtn.className = "btn ghost fit";
-    renameBtn.type="button";
-    renameBtn.textContent = "שנה שם";
-    renameBtn.onclick = function(){ onRename && onRename(); };
-
-    var closeBtn = document.createElement("button");
-    closeBtn.className = "btn mutebtn fit";
-    closeBtn.type="button";
-    closeBtn.textContent = "סגור";
-    closeBtn.onclick = function(){ hidePicker(); };
-
-    row.appendChild(saveBtn);
-    row.appendChild(renameBtn);
-    row.appendChild(closeBtn);
-
-    bottom.appendChild(row);
-
-    // Override confirm button in header (we're in details mode)
-    // We'll repurpose "אישור" as save
-    var confirmBtn = document.querySelector("#pickerBackdrop .modalActions .tiny");
-    if(confirmBtn){
-      confirmBtn.textContent = "שמירה";
-      confirmBtn.onclick = saveBtn.onclick;
+      return;
     }
-  }
-
-  // ===== Link setters (keep both directions consistent) =====
-  function setBrandStores(brandId, storeIds){
-    storeIds = uniq(storeIds);
-
-    // brand -> stores
-    setLink(links.brandStores, brandId, storeIds);
-
-    // update store -> brands
-    // remove brand from all stores, then add to selected
-    Object.keys(links.storeBrands).forEach(function(sid){
-      links.storeBrands[sid] = removeFromArray(ensureLinksArray(links.storeBrands, sid), brandId);
-      if(!links.storeBrands[sid].length) delete links.storeBrands[sid];
-    });
-    storeIds.forEach(function(sid){
-      var arr = ensureLinksArray(links.storeBrands, sid);
-      setLink(links.storeBrands, sid, uniq(arr.concat([brandId])));
-    });
-
-    // keep cat cross maps untouched here
-  }
-
-  function setBrandCats(brandId, catIds){
-    catIds = uniq(catIds);
-    setLink(links.brandCats, brandId, catIds);
-
-    // cat -> brands: remove brand from all cats, then add
-    Object.keys(links.catBrands).forEach(function(cid){
-      links.catBrands[cid] = removeFromArray(ensureLinksArray(links.catBrands, cid), brandId);
-      if(!links.catBrands[cid].length) delete links.catBrands[cid];
-    });
-    catIds.forEach(function(cid){
-      var arr = ensureLinksArray(links.catBrands, cid);
-      setLink(links.catBrands, cid, uniq(arr.concat([brandId])));
-    });
-  }
-
-  function setStoreBrands(storeId, brandIds){
-    brandIds = uniq(brandIds);
-    setLink(links.storeBrands, storeId, brandIds);
-
-    // brand -> stores: remove store from all brands, then add
-    Object.keys(links.brandStores).forEach(function(bid){
-      links.brandStores[bid] = removeFromArray(ensureLinksArray(links.brandStores, bid), storeId);
-      if(!links.brandStores[bid].length) delete links.brandStores[bid];
-    });
-    brandIds.forEach(function(bid){
-      var arr = ensureLinksArray(links.brandStores, bid);
-      setLink(links.brandStores, bid, uniq(arr.concat([storeId])));
-    });
-  }
-
-  function setStoreCats(storeId, catIds){
-    catIds = uniq(catIds);
-    setLink(links.storeCats, storeId, catIds);
-
-    // cat -> stores: remove store from all cats, then add
-    Object.keys(links.catStores).forEach(function(cid){
-      links.catStores[cid] = removeFromArray(ensureLinksArray(links.catStores, cid), storeId);
-      if(!links.catStores[cid].length) delete links.catStores[cid];
-    });
-    catIds.forEach(function(cid){
-      var arr = ensureLinksArray(links.catStores, cid);
-      setLink(links.catStores, cid, uniq(arr.concat([storeId])));
-    });
-  }
-
-  function setCatBrands(catId, brandIds){
-    brandIds = uniq(brandIds);
-    setLink(links.catBrands, catId, brandIds);
-
-    // brandCats: remove cat from all brands, add for selected
-    Object.keys(links.brandCats).forEach(function(bid){
-      links.brandCats[bid] = removeFromArray(ensureLinksArray(links.brandCats, bid), catId);
-      if(!links.brandCats[bid].length) delete links.brandCats[bid];
-    });
-    brandIds.forEach(function(bid){
-      var arr = ensureLinksArray(links.brandCats, bid);
-      setLink(links.brandCats, bid, uniq(arr.concat([catId])));
-    });
-  }
-
-  function setCatStores(catId, storeIds){
-    storeIds = uniq(storeIds);
-    setLink(links.catStores, catId, storeIds);
-
-    // storeCats: remove cat from all stores, add for selected
-    Object.keys(links.storeCats).forEach(function(sid){
-      links.storeCats[sid] = removeFromArray(ensureLinksArray(links.storeCats, sid), catId);
-      if(!links.storeCats[sid].length) delete links.storeCats[sid];
-    });
-    storeIds.forEach(function(sid){
-      var arr = ensureLinksArray(links.storeCats, sid);
-      setLink(links.storeCats, sid, uniq(arr.concat([catId])));
-    });
-  }
-
-  // ===== Data tools =====
-  function clearCouponsOnly(){
-    if(!confirm("למחוק את כל השוברים?")) return;
-    coupons = [];
-    persistAll();
+    brands.push({id:uid(), name:name, storeIds:[], disabled:false});
+    saveAll();
     renderAll();
   }
-  window.clearCouponsOnly = clearCouponsOnly;
+  window.addBrand = addBrand;
 
+  function addStore(){
+    var name = (document.getElementById("newStoreInput").value || "").trim();
+    if(!name) return;
+    document.getElementById("newStoreInput").value = "";
+
+    var ex = stores.find(function(s){ return s.name.toLowerCase() === name.toLowerCase(); });
+    if(ex){
+      if(ex.disabled){
+        if(confirm("החנות קיימת אך מושבתת. להחזיר לפעילה?")){
+          ex.disabled = false;
+          saveAll();
+          renderAll();
+        }
+      } else {
+        alert("החנות כבר קיימת");
+      }
+      return;
+    }
+    stores.push({id:uid(), name:name, brandIds:[], catIds:[], disabled:false});
+    saveAll();
+    renderAll();
+  }
+  window.addStore = addStore;
+
+  function addCategory(){
+    var name = (document.getElementById("newCatInput").value || "").trim();
+    if(!name) return;
+    document.getElementById("newCatInput").value = "";
+
+    var ex = categories.find(function(c){ return c.name.toLowerCase() === name.toLowerCase(); });
+    if(ex){
+      if(ex.disabled){
+        if(confirm("הקטגוריה קיימת אך מושבתת. להחזיר לפעילה?")){
+          ex.disabled = false;
+          saveAll();
+          renderAll();
+        }
+      } else {
+        alert("הקטגוריה כבר קיימת");
+      }
+      return;
+    }
+    categories.push({id:uid(), name:name, disabled:false});
+    saveAll();
+    renderAll();
+  }
+  window.addCategory = addCategory;
+
+  function quickRenameBrand(brandId){
+    var b = findBrandById(brandId);
+    if(!b) return;
+    var nn = (prompt("שם חדש למותג:", b.name) || "").trim();
+    if(!nn) return;
+    b.name = nn;
+    saveAll();
+    renderAll();
+  }
+  function quickRenameStore(storeId){
+    var s = findStoreById(storeId);
+    if(!s) return;
+    var nn = (prompt("שם חדש לחנות:", s.name) || "").trim();
+    if(!nn) return;
+    s.name = nn;
+    saveAll();
+    renderAll();
+  }
+
+  /* ===== Brand modal (manage links) ===== */
+  var brandEditingId = null;
+
+  function openBrandModal(brandId){
+    var b = findBrandById(brandId);
+    if(!b) return;
+    brandEditingId = brandId;
+
+    document.getElementById("brandModalTitle").textContent = "מותג: " + b.name;
+    document.getElementById("brandNameEdit").value = b.name;
+
+    var multi = document.getElementById("brandStoresMulti");
+    multi.innerHTML = "";
+    stores.filter(function(s){return !s.disabled;}).slice().sort(function(a,b){return a.name.localeCompare(b.name,"he");})
+      .forEach(function(s){
+        var o = document.createElement("option");
+        o.value = s.id;
+        o.textContent = s.name;
+        o.selected = (b.storeIds||[]).indexOf(s.id)>=0;
+        multi.appendChild(o);
+      });
+
+    document.getElementById("brandBackdrop").style.display = "flex";
+  }
+  window.openBrandModal = openBrandModal;
+
+  function hideBrandModal(){
+    document.getElementById("brandBackdrop").style.display = "none";
+    brandEditingId = null;
+  }
+  window.hideBrandModal = hideBrandModal;
+
+  function closeBrandModal(e){
+    if(e.target === document.getElementById("brandBackdrop")) hideBrandModal();
+  }
+  window.closeBrandModal = closeBrandModal;
+
+  function renameBrand(){
+    if(!brandEditingId) return;
+    var b = findBrandById(brandEditingId);
+    if(!b) return;
+    var nn = (document.getElementById("brandNameEdit").value || "").trim();
+    if(!nn) return;
+    b.name = nn;
+    saveAll();
+    renderAll();
+    document.getElementById("brandModalTitle").textContent = "מותג: " + b.name;
+  }
+  window.renameBrand = renameBrand;
+
+  function quickAddStoreFromBrand(){
+    var name = (prompt("שם חנות חדשה:") || "").trim();
+    if(!name) return;
+    var ex = stores.find(function(s){ return s.name.toLowerCase() === name.toLowerCase(); });
+    var id;
+    if(ex){
+      if(ex.disabled){
+        if(confirm("החנות קיימת אך מושבתת. להחזיר לפעילה?")){
+          ex.disabled = false;
+        }
+      }
+      id = ex.id;
+    } else {
+      var s = { id:uid(), name:name, brandIds:[], catIds:[], disabled:false };
+      stores.push(s);
+      id = s.id;
+    }
+    saveAll();
+    // refresh modal list
+    openBrandModal(brandEditingId);
+    // select it
+    var multi = document.getElementById("brandStoresMulti");
+    for(var i=0;i<multi.options.length;i++){
+      if(multi.options[i].value === id) multi.options[i].selected = true;
+    }
+  }
+  window.quickAddStoreFromBrand = quickAddStoreFromBrand;
+
+  function selectAllBrandStores(){
+    var multi = document.getElementById("brandStoresMulti");
+    for(var i=0;i<multi.options.length;i++) multi.options[i].selected = true;
+  }
+  window.selectAllBrandStores = selectAllBrandStores;
+
+  function clearAllBrandStores(){
+    var multi = document.getElementById("brandStoresMulti");
+    for(var i=0;i<multi.options.length;i++) multi.options[i].selected = false;
+  }
+  window.clearAllBrandStores = clearAllBrandStores;
+
+  function saveBrandLinks(){
+    if(!brandEditingId) return;
+    var b = findBrandById(brandEditingId);
+    if(!b) return;
+    var multi = document.getElementById("brandStoresMulti");
+    var storeIds = getSelectedValues(multi);
+
+    b.storeIds = storeIds;
+
+    // update store -> brandIds (bidirectional)
+    stores.forEach(function(s){
+      var has = (s.brandIds||[]).indexOf(b.id)>=0;
+      var should = storeIds.indexOf(s.id)>=0;
+      if(should && !has) s.brandIds.push(b.id);
+      if(!should && has) s.brandIds = s.brandIds.filter(function(x){return x!==b.id;});
+    });
+
+    saveAll();
+    renderAll();
+    alert("נשמר ✅");
+  }
+  window.saveBrandLinks = saveBrandLinks;
+
+  function deleteBrand(){
+    if(!brandEditingId) return;
+    var b = findBrandById(brandEditingId);
+    if(!b) return;
+    if(!confirm("למחוק מותג?")) return;
+
+    // remove references in stores
+    stores.forEach(function(s){
+      s.brandIds = (s.brandIds||[]).filter(function(x){ return x!==b.id; });
+    });
+
+    // remove brand from list (keep voucher history)
+    brands = brands.filter(function(x){ return x.id !== b.id; });
+
+    // vouchers keep brandNameAtCreation, but brandId may point nowhere
+    vouchers.forEach(function(v){
+      if(v.brandId === b.id){
+        v.brandId = "";
+        if(!v.brandNameAtCreation) v.brandNameAtCreation = b.name;
+      }
+    });
+
+    saveAll();
+    renderAll();
+    hideBrandModal();
+  }
+  window.deleteBrand = deleteBrand;
+
+  /* ===== Store modal ===== */
+  var storeEditingId = null;
+
+  function openStoreModal(storeId){
+    var s = findStoreById(storeId);
+    if(!s) return;
+    storeEditingId = storeId;
+
+    document.getElementById("storeModalTitle").textContent = "חנות: " + s.name;
+    document.getElementById("storeNameEdit").value = s.name;
+
+    var bMulti = document.getElementById("storeBrandsMulti");
+    bMulti.innerHTML = "";
+    brands.filter(function(b){return !b.disabled;}).slice().sort(function(a,b){return a.name.localeCompare(b.name,"he");})
+      .forEach(function(b){
+        var o = document.createElement("option");
+        o.value = b.id;
+        o.textContent = b.name;
+        o.selected = (s.brandIds||[]).indexOf(b.id)>=0;
+        bMulti.appendChild(o);
+      });
+
+    var cMulti = document.getElementById("storeCatsMulti");
+    cMulti.innerHTML = "";
+    categories.filter(function(c){return !c.disabled;}).slice().sort(function(a,b){return a.name.localeCompare(b.name,"he");})
+      .forEach(function(c){
+        var o2 = document.createElement("option");
+        o2.value = c.id;
+        o2.textContent = c.name;
+        o2.selected = (s.catIds||[]).indexOf(c.id)>=0;
+        cMulti.appendChild(o2);
+      });
+
+    document.getElementById("storeBackdrop").style.display = "flex";
+  }
+  window.openStoreModal = openStoreModal;
+
+  function hideStoreModal(){
+    document.getElementById("storeBackdrop").style.display = "none";
+    storeEditingId = null;
+  }
+  window.hideStoreModal = hideStoreModal;
+
+  function closeStoreModal(e){
+    if(e.target === document.getElementById("storeBackdrop")) hideStoreModal();
+  }
+  window.closeStoreModal = closeStoreModal;
+
+  function renameStore(){
+    if(!storeEditingId) return;
+    var s = findStoreById(storeEditingId);
+    if(!s) return;
+    var nn = (document.getElementById("storeNameEdit").value || "").trim();
+    if(!nn) return;
+    s.name = nn;
+    saveAll();
+    renderAll();
+    document.getElementById("storeModalTitle").textContent = "חנות: " + s.name;
+  }
+  window.renameStore = renameStore;
+
+  function saveStoreLinks(){
+    if(!storeEditingId) return;
+    var s = findStoreById(storeEditingId);
+    if(!s) return;
+
+    var bMulti = document.getElementById("storeBrandsMulti");
+    var cMulti = document.getElementById("storeCatsMulti");
+
+    s.brandIds = getSelectedValues(bMulti);
+    s.catIds = getSelectedValues(cMulti);
+
+    // update brands storeIds (bidirectional)
+    brands.forEach(function(b){
+      var has = (b.storeIds||[]).indexOf(s.id)>=0;
+      var should = (s.brandIds||[]).indexOf(b.id)>=0;
+      if(should && !has) b.storeIds.push(s.id);
+      if(!should && has) b.storeIds = b.storeIds.filter(function(x){return x!==s.id;});
+    });
+
+    saveAll();
+    renderAll();
+    alert("נשמר ✅");
+  }
+  window.saveStoreLinks = saveStoreLinks;
+
+  function deleteStore(){
+    if(!storeEditingId) return;
+    var s = findStoreById(storeEditingId);
+    if(!s) return;
+    if(!confirm("למחוק חנות?")) return;
+
+    // remove from brands
+    brands.forEach(function(b){
+      b.storeIds = (b.storeIds||[]).filter(function(x){ return x!==s.id; });
+    });
+
+    // remove store entity
+    stores = stores.filter(function(x){ return x.id !== s.id; });
+
+    // vouchers keep storeNamesAtCreation, but storeIds may point nowhere
+    vouchers.forEach(function(v){
+      if((v.storeIds||[]).indexOf(s.id)>=0){
+        v.storeIds = (v.storeIds||[]).filter(function(x){ return x!==s.id; });
+        if(!v.storeNamesAtCreation || !v.storeNamesAtCreation.length){
+          v.storeNamesAtCreation = [s.name];
+        } else if(v.storeNamesAtCreation.indexOf(s.name)<0){
+          v.storeNamesAtCreation.push(s.name);
+        }
+      }
+    });
+
+    saveAll();
+    renderAll();
+    hideStoreModal();
+  }
+  window.deleteStore = deleteStore;
+
+  /* ===== Reset ===== */
   function resetAll(){
-    if(!confirm("איפוס מלא?")) return;
+    if(!confirm("איפוס מלא במכשיר הזה?")) return;
     localStorage.clear();
     location.reload();
   }
   window.resetAll = resetAll;
 
-  // ===== Device settings (Yanir only) =====
-  function renderDeviceCard(){
-    var card = document.getElementById("deviceCard");
-    if(!card) return;
-    if(DEVICE_NAME === "Yanir"){
-      card.style.display = "block";
-      var sel = document.getElementById("deviceNameSelect");
-      if(sel) sel.value = DEVICE_NAME;
-    } else {
-      card.style.display = "none";
-    }
-  }
-  function changeDeviceName(){
-    var sel = document.getElementById("deviceNameSelect");
-    if(!sel) return;
-    DEVICE_NAME = sel.value || "Yanir";
-    localStorage.setItem("deviceName", DEVICE_NAME);
-    renderDeviceCard();
-    showLocalNoteIfYanir();
-  }
-  window.changeDeviceName = changeDeviceName;
-
-  // ===== Copy code in coupon (in “open”) =====
-  // We include inside editor: if code exists add a quick copy button in hint
-  function updateCopyHint(){
-    if(!editingCouponId) return;
-    var c = getCouponById(editingCouponId);
-    if(!c) return;
-    var hint = document.getElementById("couponModalHint");
-    if(!hint) return;
-
-    var code = String(document.getElementById("cCode").value || "").trim();
-    if(!code){
-      hint.textContent = "אין קוד להעתקה.";
-      return;
-    }
-    hint.innerHTML = 'יש קוד. <button class="tiny" type="button" onclick="copyCurrentCode()">העתק קוד</button>';
-  }
-  window.copyCurrentCode = function(){
-    var code = String(document.getElementById("cCode").value || "").trim();
-    if(!code) return;
-    try{
-      if(navigator.clipboard && navigator.clipboard.writeText){
-        navigator.clipboard.writeText(code).then(function(){
-          alert("הועתק ✅");
-        }).catch(function(){
-          fallbackCopy(code);
-        });
-      } else {
-        fallbackCopy(code);
-      }
-    } catch(e){
-      fallbackCopy(code);
-    }
-  };
-  function fallbackCopy(text){
-    try{
-      var ta = document.createElement("textarea");
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand("copy");
-      ta.remove();
-      alert("הועתק ✅");
-    } catch(e){
-      alert("לא הצלחתי להעתיק. תעתיק ידנית.");
-    }
-  }
-
-  // Observe code changes to refresh hint
-  document.getElementById("cCode").addEventListener("input", function(){ updateCopyHint(); });
-
-  // When opening editor, we set hint as well
-  var _origOpen = openCouponEditor;
-  openCouponEditor = function(id){
-    _origOpen(id);
-    if(id){
-      updateCopyHint();
-      // If coupon is archived, show restore action hint
-      var c = getCouponById(id);
-      if(c && c.archived){
-        var hint = document.getElementById("couponModalHint");
-        var msg = "השובר בארכיון (" + (c.archivedReason||"") + "). ";
-        msg += 'כדי להחזיר לפעיל: <button class="tiny" type="button" onclick="restoreCoupon()">החזר לפעיל</button>';
-        hint.innerHTML = msg;
-      }
-    } else {
-      document.getElementById("couponModalHint").textContent = "";
-    }
-  };
-  window.openCouponEditor = openCouponEditor;
-
-  window.restoreCoupon = function(){
-    if(!editingCouponId) return;
-    var c = getCouponById(editingCouponId);
-    if(!c) return;
-
-    // restore only if it is actually available now (not expired and not remaining 0 etc.)
-    c.archived = false;
-    c.archivedAt = 0;
-    c.archivedReason = "";
-    // But if still unavailable, it will auto-archive again
-    c.updatedAt = Date.now();
-    c.consumedManual = false; // allow restore for non-value types too (user can mark consumed again)
-    ensureArchiveState(c);
-
-    persistAll();
-    normalizeCoupons();
-    hideCouponModal();
-    renderAll();
-  };
-
-  // ===== Render All =====
+  /* ===== Render all ===== */
   function renderAll(){
+    initFilterChips();
     renderActive();
     renderArchive();
     renderManage();
-
-    renderSyncLastLine();
-    showLocalNoteIfYanir();
-    renderDeviceCard();
+    renderDataTab();
   }
 
-  // Initial render
+  // Initial load
+  autoArchiveByRules();
   renderAll();
-  setSyncMsg("מקומי (" + DEVICE_NAME + ")");
+  renderDataTab();
+  setSyncMsg("מוכן ✅");
   renderSyncLastLine();
 </script>
+
 </body>
 </html>
