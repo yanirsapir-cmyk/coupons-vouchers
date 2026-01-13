@@ -1,4 +1,4 @@
-const CACHE = "coupons-cache-v6";
+const CACHE = "coupons-cache-v7";
 
 const CORE = [
   "./",
