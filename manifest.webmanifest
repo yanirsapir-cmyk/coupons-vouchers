@@ -1,6 +1,6 @@
 {
-  "name": "קופונים ושוברים",
-  "short_name": "קופונים",
+  "name": "שוברים וקופונים",
+  "short_name": "שוברים",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f6f7fb",
