@@ -1,4 +1,4 @@
-const CACHE = "coupons-cache-v1";
+const CACHE = "coupons-cache-v6"; // גרסה חדשה כדי לכפות עדכון בנייד
 
 const CORE = [
   "./",
@@ -33,16 +33,16 @@ self.addEventListener("fetch", (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
-  // same origin only
+  // רק אותו דומיין
   if (url.origin !== self.location.origin) return;
 
-  // network-first for navigations to get updated builds
+  // Network-first לניווט כדי לקבל גרסאות חדשות
   if (req.mode === "navigate") {
     event.respondWith(networkFirst("./index.html"));
     return;
   }
 
-  // cache-first for app assets
+  // שאר הקבצים cache-first
   event.respondWith(cacheFirst(req));
 });
 
