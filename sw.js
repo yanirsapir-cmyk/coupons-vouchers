@@ -33,13 +33,16 @@ self.addEventListener("fetch", (event) => {
   const req = event.request;
   const url = new URL(req.url);
 
+  // same origin only
   if (url.origin !== self.location.origin) return;
 
+  // network-first for navigations to get updated builds
   if (req.mode === "navigate") {
     event.respondWith(networkFirst("./index.html"));
     return;
   }
 
+  // cache-first for app assets
   event.respondWith(cacheFirst(req));
 });
 
