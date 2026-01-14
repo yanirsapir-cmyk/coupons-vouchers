@@ -8,10 +8,10 @@
   <link rel="manifest" href="manifest.webmanifest">
   <meta name="theme-color" content="#2563eb">
 
-  <!-- iOS / PWA icons -->
+  <!-- App icons -->
+  <link rel="icon" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png">
   <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png">
-  <link rel="icon" type="image/png" href="icon-192.png">
 
   <style>
     :root{
@@ -20,24 +20,27 @@
       --danger:#ef4444; --muted:#6b7280;
       --shadow:0 6px 18px rgba(0,0,0,0.06);
       --radius:16px;
+      --pill:#f3f4f6;
 
-      /* Pastel statuses */
+      /* pastel statuses */
       --good:#5fbf73;
       --warn:#f2c94c;
       --bad:#ef6b6b;
       --off:#b9c0cc;
 
-      /* Selection */
+      /* pastel backgrounds for pills */
+      --bgGood:#e9f7ee;
+      --bgWarn:#fff7db;
+      --bgBad:#ffe4e6;
+      --bgOff:#eef2f7;
+
       --sel:#e9f7ee;
       --selBorder:#bfe7cc;
 
-      /* CTA (orange soft) */
-      --ctaBg:#fff1e6;
-      --ctaBorder:#ffd7bd;
-      --ctaText:#9a3412;
-
-      --softGreen:#e9f7ee;
-      --softBlue:#eef2ff;
+      /* CTA pastel orange */
+      --ctaBg:#ffe8cf;
+      --ctaBorder:#ffd2a3;
+      --ctaText:#8a4b06;
     }
 
     *{box-sizing:border-box}
@@ -46,13 +49,13 @@
       font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
       background:var(--bg); color:#111827; line-height:1.35;
     }
-    h1{margin:6px 0 14px;font-size:22px;font-weight:900;display:flex;align-items:center;gap:10px}
+    h1{margin:6px 0 14px;font-size:22px;font-weight:900}
     h2{margin:0 0 10px;font-size:18px}
     h3{margin:14px 0 6px;font-size:13px;color:var(--muted)}
     .card{
       background:var(--card); border:1px solid var(--border);
       border-radius:var(--radius); box-shadow:var(--shadow);
-      padding:12px; margin-bottom:12px;
+      padding:12px; margin-bottom:12px; overflow:hidden;
     }
     .tabs{display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;}
     .tabbtn{
@@ -60,6 +63,7 @@
       border-radius:999px; padding:9px 12px; font-weight:900; cursor:pointer;
     }
     .tabbtn.active{background:var(--primary); color:#fff; border-color:var(--primary);}
+
     .view{display:none}
     .view.active{display:block}
 
@@ -69,12 +73,18 @@
     }
     .primary{background:var(--primary); color:#fff}
     .primary:hover{background:var(--primary2)}
-    .ghost{background:var(--softBlue); color:#1e40af; border:1px solid #c7d2fe}
+    .ghost{background:#eef2ff; color:#1e40af; border:1px solid #c7d2fe}
     .danger{background:#fee2e2; color:#991b1b; border:1px solid #fecaca}
     .subtle{background:#f3f4f6; color:#111827; border:1px solid var(--border)}
-    .ctaBtn{background:var(--ctaBg); color:var(--ctaText); border:1px solid var(--ctaBorder)}
+
+    .ctaSoft{
+      background:var(--ctaBg);
+      color:var(--ctaText);
+      border:1px solid var(--ctaBorder);
+    }
 
     .inline{display:flex; gap:10px; align-items:center; flex-wrap:wrap;}
+    .inline > *{flex:0 0 auto}
     .grow{flex:1 1 auto; min-width:200px}
 
     label{font-weight:900; font-size:13px}
@@ -88,57 +98,83 @@
 
     .note{font-size:13px;color:var(--muted);margin-top:6px}
 
-    /* Voucher card */
+    /* voucher list card */
     .voucher{
       display:flex; align-items:center; justify-content:space-between;
       gap:10px;
       border:1px solid var(--border);
       border-radius:16px;
-      padding:10px;
+      padding:10px 10px;
       background:#fff;
       margin-bottom:8px;
     }
     .voucher-left{
       display:flex; align-items:center; gap:10px; min-width:0;
     }
-    .voucher-main{min-width:0; display:flex; flex-direction:column; gap:2px;}
-    .voucher-title{font-weight:900; font-size:14px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-    .voucher-sub{font-weight:900; font-size:12px; color:#4b5563; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
-    .voucher-meta{display:flex; gap:8px; align-items:center; flex-wrap:wrap}
-    .voucher-metaText{font-weight:900; font-size:12px; color:#6b7280; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;}
+    .voucher-main{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:3px;
+    }
+    .voucher-title{
+      font-weight:900;
+      font-size:14px;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      display:flex;
+      align-items:center;
+      gap:8px;
+    }
+    .voucher-sub{
+      font-weight:900;
+      font-size:12px;
+      color:#4b5563;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+    }
+    .voucher-meta{
+      font-weight:900;
+      font-size:12px;
+      color:#6b7280;
+      white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
 
     .openBtn{
       background:var(--primary); color:#fff;
       border:none; border-radius:12px;
       padding:8px 12px;
-      font-weight:900; cursor:pointer;
+      font-weight:900;
+      cursor:pointer;
       flex:0 0 auto;
     }
 
-    /* Ticket icon – same SVG as header, just recolored (no background box) */
-    .ticketIcon{ width:22px; height:22px; flex:0 0 auto; display:block; }
+    /* icon – color is the icon itself (no background) */
+    .ticketIcon{ width:22px; height:22px; flex:0 0 auto; }
     .c-good{ color:var(--good); }
     .c-warn{ color:var(--warn); }
     .c-bad{  color:var(--bad);  }
     .c-off{  color:var(--off);  }
 
-    /* Amount badge (bold bubble) */
-    .amtBadge{
-      font-weight:900; font-size:12px;
-      padding:6px 10px;
-      border-radius:999px;
-      border:1px solid var(--border);
+    .remainPill{
       display:inline-flex;
       align-items:center;
-      gap:8px;
-      white-space:nowrap;
+      gap:6px;
+      padding:4px 9px;
+      border-radius:999px;
+      border:1px solid var(--border);
+      font-weight:900;
+      font-size:12px;
+      color:#111827;
     }
-    .amt-good{ background:rgba(95,191,115,0.18); border-color:rgba(95,191,115,0.35); color:#14532d;}
-    .amt-warn{ background:rgba(242,201,76,0.18); border-color:rgba(242,201,76,0.35); color:#7a5b00;}
-    .amt-bad{  background:rgba(239,107,107,0.16); border-color:rgba(239,107,107,0.35); color:#7f1d1d;}
-    .amt-off{  background:rgba(185,192,204,0.22); border-color:rgba(185,192,204,0.45); color:#334155;}
+    .pill-good{ background:var(--bgGood); border-color:var(--selBorder); }
+    .pill-warn{ background:var(--bgWarn); border-color:#ffe7a3; }
+    .pill-bad { background:var(--bgBad);  border-color:#fecdd3; }
+    .pill-off { background:var(--bgOff);  border-color:#dde3ee; }
 
-    /* Filters */
+    /* filters */
     .filters{
       display:flex; gap:8px; flex-wrap:nowrap; overflow-x:auto;
       -webkit-overflow-scrolling:touch;
@@ -158,7 +194,7 @@
     .pillBtn.active{ background:#e8efff; border-color:#c7d2fe; color:#1e40af; }
     .pillBtn.dangerActive{ background:#ffe4e6; border-color:#fecdd3; color:#9f1239; }
 
-    /* Chips */
+    /* chips */
     .chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:8px;}
     .chip{
       border:1px solid var(--border);
@@ -179,14 +215,12 @@
       color:#14532d;
     }
 
-    /* Manage compact */
-    .compactList{list-style:none;padding:0;margin:10px 0 0}
-    .compactList li{
+    /* management - compact */
+    ul{list-style:none;padding:0;margin:10px 0 0}
+    li{
       display:flex; justify-content:space-between; gap:10px;
       background:#fff; border:1px solid var(--border);
-      border-radius:12px;
-      padding:7px 10px;
-      margin-bottom:6px;
+      border-radius:12px; padding:7px 10px; margin-bottom:6px;
       align-items:center;
     }
     .compactText{
@@ -201,12 +235,12 @@
     .iconbtn{
       background:#f3f4f6; color:#111827;
       padding:7px 9px; border-radius:10px; border:1px solid var(--border);
-      font-weight:900; cursor:pointer;
+      font-weight:900; line-height:1; cursor:pointer;
       display:inline-flex; align-items:center; justify-content:center;
       min-width:38px;
     }
 
-    /* Modal */
+    /* modal */
     .modal-backdrop{
       position:fixed; inset:0;
       background:rgba(0,0,0,0.35);
@@ -239,7 +273,7 @@
       padding:4px 0 10px;
       z-index:2;
     }
-    .modal-title{font-weight:900;font-size:18px;display:flex;align-items:center;gap:8px}
+    .modal-title{font-weight:900;font-size:18px}
     .modal-actions{display:flex;gap:10px;flex-wrap:wrap}
     .tiny{
       padding:8px 10px;
@@ -255,25 +289,21 @@
 
     .sectionSep{height:1px; background:#eef2f7; margin:12px 0;}
 
-    /* Money block separation (as requested) */
-    .moneyBlock{
-      margin-top:10px;
-      background:#f8fafc;
-      border:1px solid #e5e7eb;
+    /* money section visual separation */
+    .moneyBox{
+      border:1px solid #e9edf6;
+      background:#fbfcff;
       border-radius:16px;
-      padding:12px;
+      padding:10px;
     }
-    .moneyBlock h3{margin:0 0 10px;color:#334155}
+    .moneyBox h3{margin:0 0 10px; color:#374151}
 
     @media(min-width:700px){ body{max-width:900px;margin:auto} }
   </style>
 </head>
 
 <body>
-  <h1>
-    <span id="appTitleIcon"></span>
-    שוברים וקופונים
-  </h1>
+  <h1>🎟️ שוברים וקופונים</h1>
 
   <div class="tabs">
     <button class="tabbtn active" type="button" onclick="showTab('active')">פעילים</button>
@@ -284,11 +314,10 @@
 
   <!-- פעילים -->
   <section id="view-active" class="view active">
-    <section class="card">
+    <section class="card" style="background:var(--ctaBg); border-color:var(--ctaBorder);">
       <h2 style="margin:0 0 6px 0;">יצירת שובר חדש</h2>
-      <div class="note" style="margin:0 0 10px 0;">לחץ כאן להוספת שובר חדש</div>
-      <!-- button pastel orange (as requested) -->
-      <button class="btn ctaBtn" type="button" onclick="openVoucherModal(null)">➕ הוסף שובר</button>
+      <div class="note" style="margin:0 0 10px 0; color:var(--ctaText);">לחץ כאן להוספת שובר חדש</div>
+      <button class="btn ctaSoft" type="button" onclick="openVoucherModal(null)">➕ הוסף שובר</button>
     </section>
 
     <section class="card">
@@ -393,8 +422,8 @@
           <input id="newBrandName" class="grow" placeholder="שם מותג חדש">
           <button class="btn primary" type="button" onclick="addBrand()">הוסף</button>
         </div>
-        <ul id="brandsList" class="compactList"></ul>
-        <div class="note">אין קטגוריות למותג עצמו — קטגוריות נגזרות מהחנויות המשויכות אליו.</div>
+        <ul id="brandsList"></ul>
+        <div class="note">במותג מנהלים רק “איזה חנויות שייכות למותג”. קטגוריות מנוהלות רק בחנויות.</div>
       </div>
 
       <!-- חנויות -->
@@ -403,7 +432,8 @@
           <input id="newStoreName" class="grow" placeholder="שם חנות חדשה">
           <button class="btn primary" type="button" onclick="addStore()">הוסף</button>
         </div>
-        <ul id="storesList" class="compactList"></ul>
+        <ul id="storesList"></ul>
+        <div class="note">בכל חנות מנהלים: שיוך למותגים + קטגוריות.</div>
       </div>
 
       <!-- קטגוריות -->
@@ -412,7 +442,7 @@
           <input id="newCatName" class="grow" placeholder="שם קטגוריה חדשה">
           <button class="btn primary" type="button" onclick="addCategory()">הוסף</button>
         </div>
-        <ul id="catsList" class="compactList"></ul>
+        <ul id="catsList"></ul>
       </div>
     </section>
   </section>
@@ -433,7 +463,6 @@
 
       <input id="restoreFile" type="file" accept=".json,application/json" style="display:none" onchange="restoreFromFile(event)">
       <div class="note" id="syncLocalNote" style="display:none; margin-top:10px;"></div>
-      <div class="note" id="syncLocalErr" style="display:none; margin-top:6px; color:#991b1b;"></div>
     </section>
 
     <section class="card" id="deviceCard" style="display:none;">
@@ -453,7 +482,7 @@
   <div id="voucherBackdrop" class="modal-backdrop" onclick="closeVoucherModal(event)">
     <div class="modal" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <div class="modal-title" id="voucherModalTitle"></div>
+        <div class="modal-title" id="voucherModalTitle">➕ שובר חדש</div>
         <div class="modal-actions">
           <button class="tiny primaryTiny" type="button" onclick="saveVoucherFromModal()">שמירה</button>
           <button class="tiny" type="button" onclick="hideVoucherModal()">סגור</button>
@@ -480,6 +509,7 @@
 
       <div class="sectionSep"></div>
 
+      <!-- מותג/חנות: בלי "שם שובר" -->
       <div class="field">
         <label>מותג (אופציונלי)</label>
         <select id="vBrand" onchange="onVoucherBrandChanged()"></select>
@@ -487,8 +517,8 @@
       </div>
 
       <div class="field">
-        <label>מותג תקף לכל הרשת?</label>
-        <select id="vAllNetwork" onchange="onAllNetworkChanged()">
+        <label>האם השובר תקף לכל הרשת?</label>
+        <select id="vAllNetwork">
           <option value="1" selected>כן (כל הרשת)</option>
           <option value="0">לא, רק חנויות מסוימות</option>
         </select>
@@ -506,11 +536,12 @@
 
         <div id="vStoresChips" class="chips"></div>
 
-        <div class="note">קטגוריות ייגזרו אוטומטית מהקטגוריות של החנויות שבחרת.</div>
+        <div class="note">הקטגוריות נגזרות מהחנויות (אין בחירת קטגוריה בתוך השובר).</div>
       </div>
 
-      <!-- Money fields separated (as requested) -->
-      <div id="moneyFields" class="moneyBlock">
+      <div class="sectionSep"></div>
+
+      <div id="moneyFields" class="moneyBox">
         <h3>סכומים (כספי)</h3>
         <div class="inline">
           <div class="grow">
@@ -529,7 +560,7 @@
         <div class="note">היתרה מחושבת אוטומטית: סכום שובר פחות נוצל.</div>
       </div>
 
-      <div class="field">
+      <div class="field" style="margin-top:12px;">
         <label>קוד / מספר שובר (אופציונלי)</label>
         <div class="inline">
           <input id="vCode" class="grow" placeholder="הדבק קוד כאן...">
@@ -541,7 +572,7 @@
       <div class="field">
         <label>תוקף (אופציונלי)</label>
         <input id="vExpiry" type="date">
-        <div class="note">תצוגה בכרטיס: dd/mm/yyyy.</div>
+        <div class="note">תצוגה בכרטיס תהיה בפורמט ישראלי (dd/mm/yyyy).</div>
       </div>
 
       <div class="field">
@@ -571,7 +602,7 @@
 /* ========= Sync Config ========= */
 var __isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
 var SYNC_URL = "https://script.google.com/macros/s/AKfycbzq9M_mKke4GTDeVPIHHfF-NFu5Yb7MADNVdeaYiuIn_S4LmkqhYejJw7DT9vR7HZG6/exec";
-var SYNC_TOKEN = "tok_coupons_9f3a6b2d_20260113"; // same in Apps Script
+var SYNC_TOKEN = "tok_coupons_9f3a6b2d_20260113"; // אותו טוקן גם ב-Apps Script
 
 var DEVICE_NAME = (function(){
   var saved = localStorage.getItem("deviceName");
@@ -617,21 +648,9 @@ function uid(){ return "id_" + Math.random().toString(16).slice(2) + "_" + Date.
 function now(){ return Date.now(); }
 function todayISO(){ return new Date().toISOString().slice(0,10); }
 
-function setSyncMsg(msg, err){
+function setSyncMsg(msg){
   var el = document.getElementById("syncStatusLine");
   if(el) el.textContent = msg || "";
-  renderSyncError(err || "");
-}
-function renderSyncError(err){
-  var el = document.getElementById("syncLocalErr");
-  if(!el) return;
-  if(DEVICE_NAME === "Yanir" && err){
-    el.style.display = "block";
-    el.textContent = "שגיאה טכנית: " + err;
-  } else {
-    el.style.display = "none";
-    el.textContent = "";
-  }
 }
 function setLastSyncNow(){
   localStorage.setItem(LAST_SYNC_AT_KEY, String(Date.now()));
@@ -650,26 +669,51 @@ function setLocalMeta(meta){
   localStorage.setItem(META_KEY, JSON.stringify(meta || { updatedAt:0, updatedBy:"" }));
 }
 function doFetchJSON(url){
-  return fetch(url, { cache:"no-store" }).then(function(r){ return r.json(); });
-}
-function doPostJSON(url, bodyObj){
-  return fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify(bodyObj)
-  }).then(function(r){ return r.json(); });
+  return fetch(url, { cache:"no-store" }).then(function(r){
+    return r.json().catch(function(){ throw new Error("bad_json_response"); });
+  });
 }
 
-/* ========= Data Model ========= */
 function payload(){
-  return { v: 1, brands: brands, stores: stores, categories: categories, vouchers: vouchers };
+  return {
+    v: 2,
+    brands: brands,
+    stores: stores,
+    categories: categories,
+    vouchers: vouchers
+  };
 }
-function applyPayload(p, meta){
+
+function normalizeLoaded(p){
   p = p || {};
-  brands = Array.isArray(p.brands) ? p.brands : [];
-  stores = Array.isArray(p.stores) ? p.stores : [];
-  categories = Array.isArray(p.categories) ? p.categories : [];
-  vouchers = Array.isArray(p.vouchers) ? p.vouchers : [];
+  var out = {
+    v: Number(p.v || 1),
+    brands: Array.isArray(p.brands) ? p.brands : [],
+    stores: Array.isArray(p.stores) ? p.stores : [],
+    categories: Array.isArray(p.categories) ? p.categories : [],
+    vouchers: Array.isArray(p.vouchers) ? p.vouchers : []
+  };
+
+  // Backward-compat: remove brand categoryIds if exists (we don't use it)
+  out.brands.forEach(function(b){
+    if(b && b.categoryIds) delete b.categoryIds;
+  });
+
+  // Backward-compat: voucher.categoryIds existed earlier -> ignore (cats now derived from stores)
+  out.vouchers.forEach(function(v){
+    if(v && v.categoryIds) delete v.categoryIds;
+  });
+
+  return out;
+}
+
+function applyPayload(p, meta){
+  var n = normalizeLoaded(p);
+  brands = n.brands;
+  stores = n.stores;
+  categories = n.categories;
+  vouchers = n.vouchers;
+
   setLocalMeta(meta || {updatedAt:0, updatedBy:""});
   saveLocal(false);
   renderAll();
@@ -680,7 +724,7 @@ function showLocalNoteIfYanir(){
   if(!el) return;
   if(DEVICE_NAME === "Yanir"){
     el.style.display = "block";
-    el.textContent = "הערה (רק אצלך): אם יש שגיאה — תראה למטה “שגיאה טכנית” עם הסיבה המדויקת.";
+    el.textContent = "הערה (רק אצלך): אם יש כשל סנכרון – תראה כאן את שגיאת השרת (bad_token / missing_data / error...).";
   } else {
     el.style.display = "none";
   }
@@ -691,20 +735,20 @@ function syncPullNow(){
   setSyncMsg("טוען מהענן...");
   doFetchJSON(SYNC_URL + "?token=" + encodeURIComponent(SYNC_TOKEN))
     .then(function(j){
-      if(!j || !j.ok) throw new Error((j && j.error) ? j.error : "unknown");
+      if(!j || !j.ok) throw new Error((j && j.error) ? j.error : "pull_failed");
       if(!j.data){
-        setSyncMsg("אין נתונים בענן ✅");
+        setSyncMsg("אין נתונים בענן (עדיין) ✅");
         setLastSyncNow();
         return;
       }
       var remote = safeJSONParse(j.data, null);
-      if(!remote) throw new Error("bad_json_in_cloud");
+      if(!remote) throw new Error("bad_data_json");
       applyPayload(remote, j.meta);
       setSyncMsg("נטען מהענן ✅");
       setLastSyncNow();
     })
     .catch(function(e){
-      setSyncMsg("משיכה מהענן נכשלה ❌", (e && e.message) ? e.message : String(e));
+      setSyncMsg("משיכה מהענן נכשלה ❌ (" + (e && e.message ? e.message : "unknown") + ")");
       renderSyncLastLine();
     });
 }
@@ -713,14 +757,13 @@ window.syncPullNow = syncPullNow;
 function syncPushNow(){
   if(__userTyping) return;
   setSyncMsg("שולח לענן...");
-
-  // meta first: Yanir wins only if conflict
   doFetchJSON(SYNC_URL + "?token=" + encodeURIComponent(SYNC_TOKEN) + "&meta=1")
     .then(function(metaResp){
       if(!metaResp || !metaResp.ok) throw new Error((metaResp && metaResp.error) ? metaResp.error : "meta_failed");
-      var remoteMeta = metaResp.meta || { updatedAt:0, updatedBy:"" };
+      var remoteMeta = (metaResp && metaResp.meta) ? metaResp.meta : { updatedAt:0, updatedBy:"" };
       var localMeta = getLocalMeta();
 
+      // Shirly cannot overwrite Yanir newer
       if(DEVICE_NAME !== "Yanir" &&
          (remoteMeta.updatedAt||0) > (localMeta.updatedAt||0) &&
          String(remoteMeta.updatedBy||"") === "Yanir"){
@@ -728,66 +771,47 @@ function syncPushNow(){
         return syncPullNow();
       }
 
-      // IMPORTANT: send via POST (fixes long URL failures)
       var dataStr = JSON.stringify(payload());
-      return doPostJSON(SYNC_URL, {
-        token: SYNC_TOKEN,
-        write: 1,
-        by: DEVICE_NAME,
-        data: dataStr
-      }).then(function(w){
-        if(!w || !w.ok) throw new Error((w && w.error) ? w.error : "write_failed");
-        setLocalMeta(w.meta || remoteMeta);
-        setSyncMsg("נשלח לענן ✅");
-        setLastSyncNow();
+      var url = SYNC_URL
+        + "?token=" + encodeURIComponent(SYNC_TOKEN)
+        + "&write=1"
+        + "&by=" + encodeURIComponent(DEVICE_NAME)
+        + "&data=" + encodeURIComponent(dataStr);
+
+      return doFetchJSON(url).then(function(w){
+        if(w && w.ok){
+          setLocalMeta(w.meta || remoteMeta);
+          setSyncMsg("נשלח לענן ✅");
+          setLastSyncNow();
+        } else {
+          throw new Error((w && w.error) ? w.error : "push_failed");
+        }
       });
     })
     .catch(function(e){
-      setSyncMsg("שליחה לענן נכשלה ❌", (e && e.message) ? e.message : String(e));
-      renderSyncLastLine();
+      setSyncMsg("שליחה לענן נכשלה ❌ (" + (e && e.message ? e.message : "unknown") + ")");
     });
 }
 window.syncPushNow = syncPushNow;
 
 /* ========= Local Storage ========= */
-var KEY = "couponsAppData_v1";
-var initial = safeJSONParse(localStorage.getItem(KEY), null) || {};
-var brands = initial.brands || [];
-var stores = initial.stores || [];
-var categories = initial.categories || [];
-var vouchers = initial.vouchers || [];
+var KEY = "couponsAppData_v2";
+
+function readLocalRaw(){
+  return safeJSONParse(localStorage.getItem(KEY), null);
+}
+var __local = readLocalRaw();
+__local = __local ? normalizeLoaded(__local) : {brands:[],stores:[],categories:[],vouchers:[]};
+
+var brands = __local.brands || [];
+var stores = __local.stores || [];
+var categories = __local.categories || [];
+var vouchers = __local.vouchers || [];
 
 function saveLocal(triggerRender){
   localStorage.setItem(KEY, JSON.stringify(payload()));
   if(triggerRender !== false) renderAll();
 }
-
-/* ========= Utils ========= */
-function escapeHtml(s){
-  s = String(s==null?"":s);
-  return s.replace(/[&<>"']/g, function(m){
-    return ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" })[m];
-  });
-}
-function toggleIdList(arr, id, shouldHave){
-  arr = Array.isArray(arr) ? arr.slice() : [];
-  var idx = arr.indexOf(id);
-  if(shouldHave && idx<0) arr.push(id);
-  if(!shouldHave && idx>=0) arr.splice(idx,1);
-  return arr;
-}
-
-/* ========= Ticket SVG (header + list use SAME icon) ========= */
-function ticketSVG(colorClass, size){
-  size = size || 22;
-  return '<svg class="ticketIcon '+(colorClass||"")+'" style="width:'+size+'px;height:'+size+'px" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'+
-    '<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v1.2a2 2 0 0 0 0 4.1v1.7A2.5 2.5 0 0 1 17.5 17h-11A2.5 2.5 0 0 1 4 14.5v-1.7a2 2 0 0 0 0-4.1V7.5Zm5.5-.5a.75.75 0 0 0 0 1.5h5a.75.75 0 0 0 0-1.5h-5Zm0 3a.75.75 0 0 0 0 1.5h5a.75.75 0 0 0 0-1.5h-5Zm0 3a.75.75 0 0 0 0 1.5h2.5a.75.75 0 0 0 0-1.5H9.5Z"/>'+
-  '</svg>';
-}
-(function(){
-  // Header icon should be red by default (as you described)
-  document.getElementById("appTitleIcon").innerHTML = ticketSVG("c-bad", 24);
-})();
 
 /* ========= Tabs ========= */
 function showTab(key){
@@ -808,7 +832,7 @@ function showTab(key){
 }
 window.showTab = showTab;
 
-/* ========= Manage tab internal ========= */
+/* ========= Manage internal tabs ========= */
 var manageTab = "brands";
 function setManageTab(k){
   manageTab = k;
@@ -822,7 +846,7 @@ function setManageTab(k){
 }
 window.setManageTab = setManageTab;
 
-/* ========= CRUD ========= */
+/* ========= CRUD: Categories ========= */
 function addCategory(){
   var name = (document.getElementById("newCatName").value || "").trim();
   if(!name) return;
@@ -835,6 +859,10 @@ window.addCategory = addCategory;
 function deleteCategory(catId){
   if(!confirm("למחוק קטגוריה?")) return;
   categories = categories.filter(function(c){ return c.id !== catId; });
+  // remove from stores (categories belong to stores)
+  stores.forEach(function(s){
+    s.categoryIds = (s.categoryIds||[]).filter(function(id){ return id !== catId; });
+  });
   saveLocal(true);
 }
 function editCategory(catId){
@@ -846,6 +874,7 @@ function editCategory(catId){
   saveLocal(true);
 }
 
+/* ========= CRUD: Stores ========= */
 function addStore(){
   var name = (document.getElementById("newStoreName").value || "").trim();
   if(!name) return;
@@ -858,6 +887,7 @@ window.addStore = addStore;
 function deleteStore(storeId){
   if(!confirm("למחוק חנות?")) return;
   stores = stores.filter(function(s){ return s.id !== storeId; });
+  // remove from brands links
   brands.forEach(function(b){
     b.storeIds = (b.storeIds||[]).filter(function(id){ return id !== storeId; });
   });
@@ -871,11 +901,15 @@ function editStore(storeId){
   s.name = next;
   saveLocal(true);
 }
+function openStore(storeId){
+  openEntityModal("store", storeId);
+}
 
+/* ========= CRUD: Brands ========= */
 function addBrand(){
   var name = (document.getElementById("newBrandName").value || "").trim();
   if(!name) return;
-  brands.push({ id:uid(), name:name, storeIds:[] }); // NOTE: no categoryIds on brand (as requested)
+  brands.push({ id:uid(), name:name, storeIds:[] });
   document.getElementById("newBrandName").value = "";
   saveLocal(true);
 }
@@ -884,6 +918,7 @@ window.addBrand = addBrand;
 function deleteBrand(brandId){
   if(!confirm("למחוק מותג?")) return;
   brands = brands.filter(function(b){ return b.id !== brandId; });
+  // remove from stores brandIds
   stores.forEach(function(s){
     s.brandIds = (s.brandIds||[]).filter(function(id){ return id !== brandId; });
   });
@@ -897,11 +932,15 @@ function editBrand(brandId){
   b.name = next;
   saveLocal(true);
 }
+function openBrand(brandId){
+  openEntityModal("brand", brandId);
+}
 
-/* ========= Entity Modal (manage links) ========= */
+/* ========= Entity Modal (Brands/Stores relationships) ========= */
 function openEntityModal(type, id){
   var title = type==="brand" ? "מותג" : "חנות";
   var name = "";
+
   if(type==="brand"){
     var b = brands.find(function(x){ return x.id===id; });
     if(!b) return;
@@ -921,33 +960,33 @@ function openEntityModal(type, id){
   modal.className = "modal";
   modal.onclick = function(e){ e.stopPropagation(); };
 
-  // NOTE:
-  // - Brand modal: only stores (no categories)
-  // - Store modal: brands + categories
-  modal.innerHTML =
+  var html =
     '<div class="modal-header">'+
-      '<div class="modal-title">'+ticketSVG("c-bad", 20)+' 📌 '+title+': '+escapeHtml(name)+'</div>'+
+      '<div class="modal-title">📌 '+title+': '+escapeHtml(name)+'</div>'+
       '<div class="modal-actions">'+
         '<button class="tiny primaryTiny" type="button" id="entSaveBtn">שמירה</button>'+
         '<button class="tiny" type="button" id="entCloseBtn">סגור</button>'+
       '</div>'+
     '</div>'+
-    '<div class="note">מחיקה בניהול לא שוברת היסטוריה. תמיד אפשר ליצור מחדש שם שנמחק.</div>'+
-    '<div class="sectionSep"></div>'+
-    (type==="store"
-      ? '<div class="field"><label>קטגוריות לחנות</label><div id="entCats" class="chips"></div></div>'
-      : ''
-    )+
-    '<div class="field"><label>'+(type==="brand" ? 'חנויות ששייכות למותג' : 'מותגים ששייכים לחנות')+'</label><div id="entLinks" class="chips"></div></div>';
+    '<div class="note">מחיקה/עריכה בניהול לא שוברת היסטוריה בשוברים (הם שומרים snapshot טקסט). אפשר למחוק וליצור מחדש בעתיד באותו שם.</div>'+
+    '<div class="sectionSep"></div>';
 
+  if(type==="brand"){
+    html += '<div class="field"><label>חנויות ששייכות למותג</label><div id="entLinks" class="chips"></div></div>';
+  } else {
+    html +=
+      '<div class="field"><label>מותגים ששייכים לחנות</label><div id="entBrands" class="chips"></div></div>'+
+      '<div class="field"><label>קטגוריות של החנות</label><div id="entCats" class="chips"></div></div>';
+  }
+
+  modal.innerHTML = html;
   backdrop.appendChild(modal);
   document.body.appendChild(backdrop);
 
   document.getElementById("entCloseBtn").onclick = function(){ document.body.removeChild(backdrop); };
 
-  // render chips
-  if(type==="store") renderEntityCats(id);
-  renderEntityLinks(type, id);
+  if(type==="brand") renderBrandLinks(id);
+  else { renderStoreBrands(id); renderStoreCats(id); }
 
   document.getElementById("entSaveBtn").onclick = function(){
     saveLocal(true);
@@ -955,11 +994,54 @@ function openEntityModal(type, id){
   };
 }
 
-function renderEntityCats(storeId){
+function renderBrandLinks(brandId){
+  var host = document.getElementById("entLinks");
+  if(!host) return;
+  host.innerHTML = "";
+  var b = brands.find(function(x){ return x.id===brandId; });
+  if(!b) return;
+  var selected = (b.storeIds||[]).slice();
+
+  stores.slice().sort(function(a,b){ return a.name.localeCompare(b.name,"he"); }).forEach(function(s){
+    var chip = document.createElement("div");
+    chip.className = "chip" + (selected.indexOf(s.id)>=0 ? " selected" : "");
+    chip.textContent = s.name;
+    chip.onclick = function(){
+      var on = chip.classList.contains("selected");
+      chip.classList.toggle("selected", !on);
+      b.storeIds = toggleIdList(b.storeIds||[], s.id, !on);
+      s.brandIds = toggleIdList(s.brandIds||[], b.id, !on);
+    };
+    host.appendChild(chip);
+  });
+}
+
+function renderStoreBrands(storeId){
+  var host = document.getElementById("entBrands");
+  if(!host) return;
+  host.innerHTML = "";
+  var s = stores.find(function(x){ return x.id===storeId; });
+  if(!s) return;
+  var selected = (s.brandIds||[]).slice();
+
+  brands.slice().sort(function(a,b){ return a.name.localeCompare(b.name,"he"); }).forEach(function(b){
+    var chip = document.createElement("div");
+    chip.className = "chip" + (selected.indexOf(b.id)>=0 ? " selected" : "");
+    chip.textContent = b.name;
+    chip.onclick = function(){
+      var on = chip.classList.contains("selected");
+      chip.classList.toggle("selected", !on);
+      s.brandIds = toggleIdList(s.brandIds||[], b.id, !on);
+      b.storeIds = toggleIdList(b.storeIds||[], s.id, !on);
+    };
+    host.appendChild(chip);
+  });
+}
+
+function renderStoreCats(storeId){
   var host = document.getElementById("entCats");
   if(!host) return;
   host.innerHTML = "";
-
   var s = stores.find(function(x){ return x.id===storeId; });
   if(!s) return;
   var selected = (s.categoryIds||[]).slice();
@@ -977,49 +1059,15 @@ function renderEntityCats(storeId){
   });
 }
 
-function renderEntityLinks(type, id){
-  var host = document.getElementById("entLinks");
-  if(!host) return;
-  host.innerHTML = "";
-
-  if(type==="brand"){
-    var b = brands.find(function(x){ return x.id===id; });
-    if(!b) return;
-    var selected = (b.storeIds||[]).slice();
-
-    stores.slice().sort(function(a,b){ return a.name.localeCompare(b.name,"he"); }).forEach(function(s){
-      var chip = document.createElement("div");
-      chip.className = "chip" + (selected.indexOf(s.id)>=0 ? " selected" : "");
-      chip.textContent = s.name;
-      chip.onclick = function(){
-        var on = chip.classList.contains("selected");
-        chip.classList.toggle("selected", !on);
-        b.storeIds = toggleIdList(b.storeIds||[], s.id, !on);
-        s.brandIds = toggleIdList(s.brandIds||[], b.id, !on); // two-way
-      };
-      host.appendChild(chip);
-    });
-  } else {
-    var s2 = stores.find(function(x){ return x.id===id; });
-    if(!s2) return;
-    var selected2 = (s2.brandIds||[]).slice();
-
-    brands.slice().sort(function(a,b){ return a.name.localeCompare(b.name,"he"); }).forEach(function(b2){
-      var chip2 = document.createElement("div");
-      chip2.className = "chip" + (selected2.indexOf(b2.id)>=0 ? " selected" : "");
-      chip2.textContent = b2.name;
-      chip2.onclick = function(){
-        var on2 = chip2.classList.contains("selected");
-        chip2.classList.toggle("selected", !on2);
-        s2.brandIds = toggleIdList(s2.brandIds||[], b2.id, !on2);
-        b2.storeIds = toggleIdList(b2.storeIds||[], s2.id, !on2); // two-way
-      };
-      host.appendChild(chip2);
-    });
-  }
+function toggleIdList(arr, id, shouldHave){
+  arr = Array.isArray(arr) ? arr.slice() : [];
+  var idx = arr.indexOf(id);
+  if(shouldHave && idx<0) arr.push(id);
+  if(!shouldHave && idx>=0) arr.splice(idx,1);
+  return arr;
 }
 
-/* ========= Filters ========= */
+/* ========= Filters state ========= */
 var filters = {
   active: { top:"all", cats:[], brands:[], stores:[], sort:"default" },
   archive:{ top:"all", cats:[], brands:[], stores:[], sort:"default" }
@@ -1029,8 +1077,8 @@ function setTopFilter(where, val){
   filters[where].top = val;
   document.getElementById(where==="active" ? "fltA_all" : "fltR_all").classList.toggle("active", val==="all");
   var expBtn = document.getElementById(where==="active" ? "fltA_exp" : "fltR_exp");
-  expBtn.classList.toggle("active", val==="exp");
   expBtn.classList.toggle("dangerActive", val==="exp");
+  expBtn.classList.toggle("active", val==="exp");
   renderVouchers();
 }
 window.setTopFilter = setTopFilter;
@@ -1062,11 +1110,7 @@ function openVoucherModal(vId){
   editingVoucherId = vId;
   document.getElementById("voucherBackdrop").style.display = "flex";
 
-  // title with red ticket icon (same as header)
-  document.getElementById("voucherModalTitle").innerHTML =
-    ticketSVG("c-bad", 20) + (vId ? " עריכת שובר" : " יצירת שובר חדש");
-
-  // populate brand select
+  // brand select
   var brandSel = document.getElementById("vBrand");
   brandSel.innerHTML = "";
   var opt0 = document.createElement("option");
@@ -1090,14 +1134,13 @@ function openVoucherModal(vId){
   document.getElementById("vCode").value = "";
   document.getElementById("vExpiry").value = "";
   document.getElementById("vNotes").value = "";
+
   __modalSelectedStores = [];
 
   var isEdit = !!vId;
+  document.getElementById("voucherModalTitle").textContent = isEdit ? "✏️ עריכת שובר" : "➕ שובר חדש";
   document.getElementById("archiveToggleBtn").style.display = isEdit ? "inline-block" : "none";
   document.querySelector("#voucherBackdrop .btn.danger").style.display = isEdit ? "inline-block" : "none";
-
-  document.getElementById("archiveToggleBtn").textContent = "העבר לארכיון";
-  document.getElementById("archiveToggleBtn").dataset.mode = "toArchive";
 
   if(isEdit){
     var v = vouchers.find(function(x){ return x.id===vId; });
@@ -1116,13 +1159,17 @@ function openVoucherModal(vId){
       if(v.archived){
         document.getElementById("archiveToggleBtn").textContent = "החזר לפעיל";
         document.getElementById("archiveToggleBtn").dataset.mode = "toActive";
+      } else {
+        document.getElementById("archiveToggleBtn").textContent = "העבר לארכיון";
+        document.getElementById("archiveToggleBtn").dataset.mode = "toArchive";
       }
     }
+  } else {
+    document.getElementById("archiveToggleBtn").dataset.mode = "toArchive";
   }
 
   renderModalStoresChips();
   onVoucherBrandChanged();
-  onAllNetworkChanged();
   recalcRemaining();
 }
 window.openVoucherModal = openVoucherModal;
@@ -1138,17 +1185,25 @@ function closeVoucherModal(e){
 }
 window.closeVoucherModal = closeVoucherModal;
 
+function escapeHtml(s){
+  s = String(s==null?"":s);
+  return s.replace(/[&<>"']/g, function(m){
+    return ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;" })[m];
+  });
+}
+
 function copyField(id){
   var el = document.getElementById(id);
   if(!el) return;
   var val = el.value || "";
   if(!val) return;
-  navigator.clipboard?.writeText(val).then(function(){
+  try{
+    navigator.clipboard.writeText(val);
     alert("הועתק ✅");
-  }).catch(function(){
+  }catch(e){
     try{ el.select(); document.execCommand("copy"); alert("הועתק ✅"); }
-    catch(e){ alert("לא הצלחתי להעתיק. נסה ידנית."); }
-  });
+    catch(e2){ alert("לא הצלחתי להעתיק. נסה ידנית."); }
+  }
 }
 window.copyField = copyField;
 
@@ -1161,26 +1216,22 @@ function onVoucherBrandChanged(){
     hint.textContent = "ברירת מחדל: חנויות משויכות למותג נטענו אוטומטית. אפשר לשנות.";
     if(!editingVoucherId){
       __modalSelectedStores = b.storeIds.slice();
-      renderModalStoresChips();
     }
   } else if(b){
     hint.textContent = "למותג הזה אין חנויות משויכות בניהול. אפשר לבחור ידנית.";
     if(!editingVoucherId){
       __modalSelectedStores = [];
-      renderModalStoresChips();
     }
   } else {
     hint.textContent = "ללא מותג: בחר חנות/חנויות לפי הצורך.";
     if(!editingVoucherId){
       __modalSelectedStores = [];
-      renderModalStoresChips();
     }
   }
+
+  renderModalStoresChips();
 }
 window.onVoucherBrandChanged = onVoucherBrandChanged;
-
-function onAllNetworkChanged(){ /* keep visible */ }
-window.onAllNetworkChanged = onAllNetworkChanged;
 
 function pickBrandStores(){
   var brandId = document.getElementById("vBrand").value || "";
@@ -1204,6 +1255,7 @@ function quickAddStore(){
   var s = { id:uid(), name:name, brandIds:[], categoryIds:[] };
   stores.push(s);
 
+  // if brand selected, link both ways
   var brandId = document.getElementById("vBrand").value || "";
   if(brandId){
     var b = brands.find(function(x){ return x.id===brandId; });
@@ -1235,6 +1287,8 @@ function renderModalStoresChips(){
     };
     host.appendChild(chip);
   });
+
+  recalcRemaining();
 }
 
 function recalcRemaining(){
@@ -1252,6 +1306,7 @@ function validateVoucherForm(){
   var allNet = document.getElementById("vAllNetwork").value === "1";
   var hasBrand = !!brandId;
   var hasStores = (__modalSelectedStores && __modalSelectedStores.length>0);
+
   if(!hasBrand && !hasStores){
     return "חובה לבחור לפחות מותג או חנות אחת.";
   }
@@ -1261,28 +1316,27 @@ function validateVoucherForm(){
   return "";
 }
 
-function snapshotNames(brandId, storeIds){
+function snapshotVoucherNames(brandId, storeIds){
   var bName = brandId ? (brands.find(function(b){return b.id===brandId;})?.name || "") : "";
   var sNames = (storeIds||[]).map(function(id){
     return stores.find(function(s){return s.id===id;})?.name || "";
   }).filter(Boolean);
 
-  // categories are derived from stores (requested)
-  var derivedCatIds = deriveCategoryIdsFromStores(storeIds||[]);
-  var catNames = derivedCatIds.map(function(cid){
-    return categories.find(function(c){return c.id===cid;})?.name || "";
+  // categories derived from stores categoryIds
+  var catIds = [];
+  (storeIds||[]).forEach(function(sid){
+    var st = stores.find(function(s){return s.id===sid;});
+    if(st && Array.isArray(st.categoryIds)){
+      st.categoryIds.forEach(function(cid){
+        if(catIds.indexOf(cid) < 0) catIds.push(cid);
+      });
+    }
+  });
+  var cNames = catIds.map(function(id){
+    return categories.find(function(c){return c.id===id;})?.name || "";
   }).filter(Boolean);
 
-  return { brandNameSnap:bName, storeNamesSnap:sNames, catNamesSnap:catNames, derivedCatIds:derivedCatIds };
-}
-
-function deriveCategoryIdsFromStores(storeIds){
-  var set = {};
-  (storeIds||[]).forEach(function(sid){
-    var s = stores.find(function(x){return x.id===sid;});
-    (s && s.categoryIds ? s.categoryIds : []).forEach(function(cid){ set[cid]=true; });
-  });
-  return Object.keys(set);
+  return { brandNameSnap:bName, storeNamesSnap:sNames, catNamesSnap:cNames };
 }
 
 function saveVoucherFromModal(){
@@ -1305,7 +1359,7 @@ function saveVoucherFromModal(){
   var notes = document.getElementById("vNotes").value || "";
 
   var storesSel = __modalSelectedStores.slice();
-  var snap = snapshotNames(brandId, storesSel);
+  var snap = snapshotVoucherNames(brandId, storesSel);
 
   if(editingVoucherId){
     var v = vouchers.find(function(x){ return x.id===editingVoucherId; });
@@ -1316,16 +1370,13 @@ function saveVoucherFromModal(){
     v.brandId = brandId || "";
     v.allNetwork = allNet;
     v.storeIds = storesSel;
-
-    // categories are derived from stores
-    v.categoryIds = snap.derivedCatIds;
-
     v.faceValue = faceValue;
     v.usedValue = usedValue;
     v.code = code;
     v.expiry = expiry;
     v.notes = notes;
 
+    // snapshots
     v.brandNameSnap = snap.brandNameSnap;
     v.storeNamesSnap = snap.storeNamesSnap;
     v.catNamesSnap = snap.catNamesSnap;
@@ -1345,7 +1396,6 @@ function saveVoucherFromModal(){
       brandId: brandId || "",
       allNetwork: allNet,
       storeIds: storesSel,
-      categoryIds: snap.derivedCatIds,
       faceValue: faceValue,
       usedValue: usedValue,
       code: code,
@@ -1379,14 +1429,19 @@ function toggleArchiveFromModal(){
 
   var mode = document.getElementById("archiveToggleBtn").dataset.mode;
   if(mode==="toArchive"){
-    v.archived = true; v.archivedAt = now(); v.archivedReason = "manual";
+    v.archived = true;
+    v.archivedAt = now();
+    v.archivedReason = "manual";
     document.getElementById("archiveToggleBtn").textContent = "החזר לפעיל";
     document.getElementById("archiveToggleBtn").dataset.mode = "toActive";
   } else {
-    v.archived = false; v.archivedAt = 0; v.archivedReason = "";
+    v.archived = false;
+    v.archivedAt = 0;
+    v.archivedReason = "";
     document.getElementById("archiveToggleBtn").textContent = "העבר לארכיון";
     document.getElementById("archiveToggleBtn").dataset.mode = "toArchive";
   }
+
   v.updatedAt = now();
   autoArchiveRules();
   saveLocal(true);
@@ -1419,30 +1474,43 @@ function autoArchiveRules(){
 
     var rem = voucherRemaining(v);
     if(rem != null && rem <= 0){
-      v.archived = true; v.archivedAt = now(); v.archivedReason = "zero";
+      v.archived = true;
+      v.archivedAt = now();
+      v.archivedReason = "zero";
       return;
     }
     if(isExpired(v)){
-      v.archived = true; v.archivedAt = now(); v.archivedReason = "expired";
-      return;
+      v.archived = true;
+      v.archivedAt = now();
+      v.archivedReason = "expired";
     }
   });
 }
 
 /* ========= Rendering helpers ========= */
+function getBrandName(brandId){
+  var b = brands.find(function(x){ return x.id===brandId; });
+  return b ? b.name : "";
+}
 function getStoreName(storeId){
   var s = stores.find(function(x){ return x.id===storeId; });
   return s ? s.name : "";
 }
-function getCategoryName(catId){
-  var c = categories.find(function(x){ return x.id===catId; });
-  return c ? c.name : "";
+
+function ticketSVG(colorClass){
+  // This is the clean professional ticket icon (same style), color via currentColor
+  return '<svg class="ticketIcon '+colorClass+'" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">'+
+    '<path d="M4 7.5A2.5 2.5 0 0 1 6.5 5h11A2.5 2.5 0 0 1 20 7.5v1.2a2 2 0 0 0 0 4.1v1.7A2.5 2.5 0 0 1 17.5 17h-11A2.5 2.5 0 0 1 4 14.5v-1.7a2 2 0 0 0 0-4.1V7.5Zm5.5-.5a.75.75 0 0 0 0 1.5h5a.75.75 0 0 0 0-1.5h-5Zm0 3a.75.75 0 0 0 0 1.5h5a.75.75 0 0 0 0-1.5h-5Zm0 3a.75.75 0 0 0 0 1.5h2.5a.75.75 0 0 0 0-1.5H9.5Z"/>'+
+  '</svg>';
 }
 
 function getVoucherStatus(v){
+  // red (expiring soon) overrides everything for active
   if(!v.archived && isExpiringSoon(v)) return "bad";
+
   if(v.archived || isExpired(v)) return "off";
 
+  // money / any with faceValue
   if(v.faceValue != null){
     var rem = voucherRemaining(v);
     if(rem != null && rem <= 0) return "off";
@@ -1452,84 +1520,106 @@ function getVoucherStatus(v){
 
   return "good";
 }
-function statusToIconClass(status){
-  return (status==="bad") ? "c-bad" : (status==="warn") ? "c-warn" : (status==="off") ? "c-off" : "c-good";
-}
-function statusToAmtClass(status){
-  return (status==="bad") ? "amt-bad" : (status==="warn") ? "amt-warn" : (status==="off") ? "amt-off" : "amt-good";
-}
 
 function getDisplayTitle(v){
-  var brand = v.brandNameSnap || "";
+  var brand = v.brandNameSnap || getBrandName(v.brandId) || "";
   var storesSnap = Array.isArray(v.storeNamesSnap) ? v.storeNamesSnap : [];
   if(brand) return brand;
   if(storesSnap.length) return storesSnap[0];
   if(Array.isArray(v.storeIds) && v.storeIds.length) return getStoreName(v.storeIds[0]);
   return "שובר";
 }
+
 function getDisplayStoresLine(v){
   var allNet = !!v.allNetwork;
   var storesSnap = Array.isArray(v.storeNamesSnap) ? v.storeNamesSnap : [];
   var list = storesSnap.slice();
 
   if(allNet && list.length===0) return "כל הרשת";
+
   if(list.length===0 && Array.isArray(v.storeIds) && v.storeIds.length){
     list = v.storeIds.map(getStoreName).filter(Boolean);
   }
+
   if(list.length<=2) return list.join(" · ") || (allNet ? "כל הרשת" : "—");
   return list.slice(0,2).join(" · ") + " +";
 }
 
-function getDisplayMeta(v){
+function getDerivedCatsForVoucher(v){
+  // snapshot is best
+  if(Array.isArray(v.catNamesSnap) && v.catNamesSnap.length) return v.catNamesSnap.slice();
+  // derive from storeIds (for very old data)
+  var names = [];
+  (v.storeIds||[]).forEach(function(sid){
+    var st = stores.find(function(s){return s.id===sid;});
+    if(st && Array.isArray(st.categoryIds)){
+      st.categoryIds.forEach(function(cid){
+        var c = categories.find(function(x){return x.id===cid;});
+        if(c && names.indexOf(c.name) < 0) names.push(c.name);
+      });
+    }
+  });
+  return names;
+}
+
+function getDisplayMetaParts(v){
   var parts = [];
   if(v.expiry) parts.push("תוקף: " + fmtILDate(v.expiry));
-
-  // categories display (derived)
-  if(Array.isArray(v.categoryIds) && v.categoryIds.length){
-    var names = v.categoryIds.map(getCategoryName).filter(Boolean);
-    if(names.length) parts.push("קטגוריה: " + names.slice(0,1).join(", "));
-  }
-
   if(v.physical) parts.push("כרטיס פיזי");
-  return parts.join(" · ");
+
+  var cats = getDerivedCatsForVoucher(v);
+  if(cats.length) parts.push("קטגוריות: " + cats.join(", "));
+
+  return parts;
 }
 
 function matchesText(v, q){
   if(!q) return true;
   q = q.toLowerCase();
 
-  var brand = String(v.brandNameSnap||"").toLowerCase();
+  var brand = (v.brandNameSnap || getBrandName(v.brandId) || "").toLowerCase();
   var storesLine = (Array.isArray(v.storeNamesSnap) ? v.storeNamesSnap.join(" ") : "").toLowerCase();
-  var catsLine = (Array.isArray(v.catNamesSnap) ? v.catNamesSnap.join(" ") : "").toLowerCase();
+  var catsLine = (getDerivedCatsForVoucher(v).join(" ") || "").toLowerCase();
   var notes = String(v.notes||"").toLowerCase();
 
-  return brand.includes(q) || storesLine.includes(q) || catsLine.includes(q) || notes.includes(q);
+  return brand.indexOf(q)>=0 || storesLine.indexOf(q)>=0 || catsLine.indexOf(q)>=0 || notes.indexOf(q)>=0;
 }
 
 function matchesFilters(v, where){
   var f = filters[where];
 
-  if(f.top==="exp" && !isExpiringSoon(v)) return false;
+  if(f.top==="exp"){
+    if(!(isExpiringSoon(v))) return false;
+  }
 
   if(f.cats.length){
-    var ids = Array.isArray(v.categoryIds) ? v.categoryIds : [];
-    if(!ids.some(function(id){ return f.cats.indexOf(id)>=0; })) return false;
+    // categories filter by store categories
+    var names = getDerivedCatsForVoucher(v);
+    var ok = false;
+    f.cats.forEach(function(catId){
+      var cname = categories.find(function(c){return c.id===catId;})?.name;
+      if(cname && names.indexOf(cname) >= 0) ok = true;
+    });
+    if(!ok) return false;
   }
+
   if(f.brands.length){
     var bid = v.brandId || "";
     if(f.brands.indexOf(bid) < 0) return false;
   }
+
   if(f.stores.length){
     var sids = Array.isArray(v.storeIds) ? v.storeIds : [];
-    if(!sids.some(function(id){ return f.stores.indexOf(id)>=0; })) return false;
+    var ok2 = sids.some(function(id){ return f.stores.indexOf(id)>=0; });
+    if(!ok2) return false;
   }
+
   return true;
 }
 
 function sortVouchers(list, where){
   var f = filters[where];
 
-  // brand frequency (active only)
   var brandCount = {};
   vouchers.forEach(function(v){
     if(v.archived) return;
@@ -1538,17 +1628,20 @@ function sortVouchers(list, where){
     brandCount[key] = (brandCount[key]||0) + 1;
   });
 
-  function primaryCompare(a,b){
+  function baseCompare(a,b){
+    // expiring soon first (active)
     var ae = (!a.archived && isExpiringSoon(a)) ? 1 : 0;
     var be = (!b.archived && isExpiringSoon(b)) ? 1 : 0;
     if(be!==ae) return be-ae;
 
+    // frequent brand first
     var ak = a.brandId || (a.brandNameSnap||"") || "";
     var bk = b.brandId || (b.brandNameSnap||"") || "";
     var ac = brandCount[ak] || 0;
     var bc = brandCount[bk] || 0;
     if(bc!==ac) return bc-ac;
 
+    // remaining
     var ar = voucherRemaining(a); ar = (ar==null ? -1 : ar);
     var br = voucherRemaining(b); br = (br==null ? -1 : br);
     if(br!==ar) return br-ar;
@@ -1556,92 +1649,32 @@ function sortVouchers(list, where){
     return getDisplayTitle(a).localeCompare(getDisplayTitle(b),"he");
   }
 
-  function sortByExp(a,b){
-    var ae = a.expiry ? a.expiry : "9999-12-31";
-    var be = b.expiry ? b.expiry : "9999-12-31";
-    if(ae!==be) return ae.localeCompare(be);
-    return primaryCompare(a,b);
+  if(f.sort==="exp"){
+    return list.sort(function(a,b){
+      var ae = a.expiry ? a.expiry : "9999-12-31";
+      var be = b.expiry ? b.expiry : "9999-12-31";
+      if(ae!==be) return ae.localeCompare(be);
+      return baseCompare(a,b);
+    });
   }
-
-  function sortByName(a,b){
-    var c = getDisplayTitle(a).localeCompare(getDisplayTitle(b),"he");
-    if(c!==0) return c;
-    return primaryCompare(a,b);
+  if(f.sort==="name"){
+    return list.sort(function(a,b){
+      var an = getDisplayTitle(a);
+      var bn = getDisplayTitle(b);
+      var c = an.localeCompare(bn,"he");
+      if(c!==0) return c;
+      return baseCompare(a,b);
+    });
   }
-
-  function sortByAmount(a,b){
-    var ar = voucherRemaining(a); ar = (ar==null ? -1 : ar);
-    var br = voucherRemaining(b); br = (br==null ? -1 : br);
-    if(br!==ar) return br-ar;
-    return primaryCompare(a,b);
+  if(f.sort==="amount"){
+    return list.sort(function(a,b){
+      var ar = voucherRemaining(a); ar = (ar==null ? -1 : ar);
+      var br = voucherRemaining(b); br = (br==null ? -1 : br);
+      if(br!==ar) return br-ar;
+      return baseCompare(a,b);
+    });
   }
-
-  if(f.sort==="exp") return list.sort(sortByExp);
-  if(f.sort==="name") return list.sort(sortByName);
-  if(f.sort==="amount") return list.sort(sortByAmount);
-  return list.sort(primaryCompare);
-}
-
-function renderVoucherCard(v){
-  var status = getVoucherStatus(v);
-  var iconCls = statusToIconClass(status);
-  var amtCls = statusToAmtClass(status);
-
-  var card = document.createElement("div");
-  card.className = "voucher";
-
-  var left = document.createElement("div");
-  left.className = "voucher-left";
-
-  // icon (same as header)
-  var iconWrap = document.createElement("div");
-  iconWrap.innerHTML = ticketSVG(iconCls, 22);
-
-  var main = document.createElement("div");
-  main.className = "voucher-main";
-
-  var t = document.createElement("div");
-  t.className = "voucher-title";
-  t.textContent = getDisplayTitle(v);
-
-  var sub = document.createElement("div");
-  sub.className = "voucher-sub";
-  sub.textContent = getDisplayStoresLine(v);
-
-  var metaRow = document.createElement("div");
-  metaRow.className = "voucher-meta";
-
-  var metaText = document.createElement("div");
-  metaText.className = "voucher-metaText";
-  metaText.textContent = getDisplayMeta(v);
-
-  metaRow.appendChild(metaText);
-
-  // Amount badge: remaining + original (as requested)
-  var rem = voucherRemaining(v);
-  if(rem != null){
-    var face = Number(v.faceValue||0);
-    var badge = document.createElement("div");
-    badge.className = "amtBadge " + amtCls;
-    badge.textContent = "נותר: " + rem.toFixed(2).replace(/\.00$/,"") + "₪  ·  מתוך " + face.toFixed(2).replace(/\.00$/,"") + "₪";
-    metaRow.appendChild(badge);
-  }
-
-  main.appendChild(t);
-  main.appendChild(sub);
-  main.appendChild(metaRow);
-
-  left.appendChild(iconWrap);
-  left.appendChild(main);
-
-  var btn = document.createElement("button");
-  btn.className = "openBtn";
-  btn.textContent = "פתח";
-  btn.onclick = function(){ openVoucherModal(v.id); };
-
-  card.appendChild(left);
-  card.appendChild(btn);
-  return card;
+  return list.sort(baseCompare);
 }
 
 function renderVouchers(){
@@ -1652,6 +1685,7 @@ function renderVouchers(){
   var act = vouchers.filter(function(v){ return !v.archived; })
     .filter(function(v){ return matchesText(v,qA); })
     .filter(function(v){ return matchesFilters(v,"active"); });
+
   act = sortVouchers(act, "active");
 
   var hostA = document.getElementById("activeList");
@@ -1667,6 +1701,7 @@ function renderVouchers(){
   var arc = vouchers.filter(function(v){ return !!v.archived; })
     .filter(function(v){ return matchesText(v,qR); })
     .filter(function(v){ return matchesFilters(v,"archive"); });
+
   arc = sortVouchers(arc, "archive");
 
   var hostR = document.getElementById("archiveList");
@@ -1678,9 +1713,72 @@ function renderVouchers(){
   }
 }
 
-/* ========= Render manage lists ========= */
+function renderVoucherCard(v){
+  var status = getVoucherStatus(v);
+  var iconCls = (status==="bad") ? "c-bad" : (status==="warn") ? "c-warn" : (status==="off") ? "c-off" : "c-good";
+  var pillCls = (status==="bad") ? "pill-bad" : (status==="warn") ? "pill-warn" : (status==="off") ? "pill-off" : "pill-good";
+
+  var card = document.createElement("div");
+  card.className = "voucher";
+
+  var left = document.createElement("div");
+  left.className = "voucher-left";
+
+  var iconWrap = document.createElement("div");
+  iconWrap.innerHTML = ticketSVG(iconCls);
+
+  var main = document.createElement("div");
+  main.className = "voucher-main";
+
+  var t = document.createElement("div");
+  t.className = "voucher-title";
+  t.textContent = getDisplayTitle(v);
+
+  var sub = document.createElement("div");
+  sub.className = "voucher-sub";
+  sub.textContent = getDisplayStoresLine(v);
+
+  var meta = document.createElement("div");
+  meta.className = "voucher-meta";
+
+  // Remaining bubble (colored by status)
+  var rem = voucherRemaining(v);
+  if(rem != null){
+    var pill = document.createElement("span");
+    pill.className = "remainPill " + pillCls;
+    var face = (v.faceValue!=null) ? Number(v.faceValue) : null;
+
+    pill.textContent = "יתרה: " + rem.toFixed(2).replace(/\.00$/,"") + "₪"
+      + (face!=null ? (" · מתוך: " + face.toFixed(2).replace(/\.00$/,"") + "₪") : "");
+    meta.appendChild(pill);
+  }
+
+  // Other meta parts
+  getDisplayMetaParts(v).forEach(function(p){
+    var span = document.createElement("span");
+    span.textContent = p;
+    meta.appendChild(span);
+  });
+
+  main.appendChild(t);
+  main.appendChild(sub);
+  main.appendChild(meta);
+
+  left.appendChild(iconWrap);
+  left.appendChild(main);
+
+  var btn = document.createElement("button");
+  btn.className = "openBtn";
+  btn.textContent = "פתח";
+  btn.onclick = function(){ openVoucherModal(v.id); };
+
+  card.appendChild(left);
+  card.appendChild(btn);
+  return card;
+}
+
+/* ========= Render management lists ========= */
 function renderManageLists(){
-  // brands
   var bUl = document.getElementById("brandsList");
   bUl.innerHTML = "";
   brands.slice().sort(function(a,b){ return a.name.localeCompare(b.name,"he"); }).forEach(function(b){
@@ -1693,13 +1791,12 @@ function renderManageLists(){
         '<button class="iconbtn" type="button" title="מחק">❌</button>'+
       '</div>';
     var btns = li.querySelectorAll("button");
-    btns[0].onclick = function(){ openEntityModal("brand", b.id); };
+    btns[0].onclick = function(){ openBrand(b.id); };
     btns[1].onclick = function(){ editBrand(b.id); };
     btns[2].onclick = function(){ deleteBrand(b.id); };
     bUl.appendChild(li);
   });
 
-  // stores
   var sUl = document.getElementById("storesList");
   sUl.innerHTML = "";
   stores.slice().sort(function(a,b){ return a.name.localeCompare(b.name,"he"); }).forEach(function(s){
@@ -1712,13 +1809,12 @@ function renderManageLists(){
         '<button class="iconbtn" type="button" title="מחק">❌</button>'+
       '</div>';
     var btns2 = li2.querySelectorAll("button");
-    btns2[0].onclick = function(){ openEntityModal("store", s.id); };
+    btns2[0].onclick = function(){ openStore(s.id); };
     btns2[1].onclick = function(){ editStore(s.id); };
     btns2[2].onclick = function(){ deleteStore(s.id); };
     sUl.appendChild(li2);
   });
 
-  // cats
   var cUl = document.getElementById("catsList");
   cUl.innerHTML = "";
   categories.slice().sort(function(a,b){ return a.name.localeCompare(b.name,"he"); }).forEach(function(c){
@@ -1782,7 +1878,13 @@ function renderFilterChips(){
 /* ========= Backup / Restore ========= */
 function backupNow(){
   try{
-    var backup = { v: 1, exportedAt: Date.now(), deviceName: DEVICE_NAME, meta: getLocalMeta(), payload: payload() };
+    var backup = {
+      v: 2,
+      exportedAt: Date.now(),
+      deviceName: DEVICE_NAME,
+      meta: getLocalMeta(),
+      payload: payload()
+    };
     var blob = new Blob([JSON.stringify(backup, null, 2)], { type:"application/json" });
     var url = URL.createObjectURL(blob);
     var a = document.createElement("a");
@@ -1838,11 +1940,11 @@ function onDeviceChange(){
   DEVICE_NAME = v;
   localStorage.setItem("deviceName", v);
   showLocalNoteIfYanir();
-  setSyncMsg("מכשיר: " + DEVICE_NAME);
+  setSyncMsg("מקומי (" + DEVICE_NAME + ")");
 }
 window.onDeviceChange = onDeviceChange;
 
-/* ========= Render All ========= */
+/* ========= Init ========= */
 function renderAll(){
   var deviceCard = document.getElementById("deviceCard");
   if(DEVICE_NAME === "Yanir"){
@@ -1851,13 +1953,13 @@ function renderAll(){
   } else {
     deviceCard.style.display = "none";
   }
+
   renderManageLists();
   renderFilterChips();
   renderVouchers();
   renderSyncLastLine();
   showLocalNoteIfYanir();
 }
-
 setManageTab("brands");
 setSyncMsg("מקומי (" + DEVICE_NAME + ")");
 renderAll();
